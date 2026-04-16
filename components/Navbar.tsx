@@ -1,21 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import NavbarClient from './NavbarClient'
 
 export default async function Navbar() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    isAdmin = profile?.role === 'admin'
-  }
+  const session = await getServerSession(authOptions)
+  const isAdmin = session?.user?.role === 'admin'
 
   return (
     <nav className="bg-black border-b border-zinc-800 sticky top-0 z-50">
@@ -30,7 +21,7 @@ export default async function Navbar() {
             <Link href="/listings" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
               Listings
             </Link>
-            {user && (
+            {session && (
               <Link href="/orders" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
                 My Orders
               </Link>
@@ -42,7 +33,7 @@ export default async function Navbar() {
             )}
           </div>
 
-          <NavbarClient user={user} />
+          <NavbarClient user={session?.user ?? null} />
         </div>
       </div>
     </nav>

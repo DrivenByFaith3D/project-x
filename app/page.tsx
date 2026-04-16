@@ -1,20 +1,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
-import type { Product } from '@/types'
 
 export default async function HomePage() {
-  const supabase = await createClient()
-  const { data: products } = await supabase
-    .from('products')
-    .select('*')
-    .limit(3)
-    .order('created_at', { ascending: false })
+  const products = await prisma.product.findMany({
+    take: 3,
+    orderBy: { createdAt: 'desc' },
+  })
 
   return (
     <div>
-      {/* Hero */}
       <section className="bg-black border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
           <div className="flex flex-col lg:flex-row items-center gap-12">
@@ -27,12 +23,8 @@ export default async function HomePage() {
                 precision and speed. Upload your STL files and get started today.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/orders/new" className="btn-primary px-8 py-3">
-                  Start Custom Order
-                </Link>
-                <Link href="/listings" className="btn-secondary px-8 py-3">
-                  Browse Products
-                </Link>
+                <Link href="/orders/new" className="btn-primary px-8 py-3">Start Custom Order</Link>
+                <Link href="/listings" className="btn-secondary px-8 py-3">Browse Products</Link>
               </div>
             </div>
             <div className="shrink-0">
@@ -42,7 +34,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="py-16 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -61,18 +52,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      {products && products.length > 0 && (
+      {products.length > 0 && (
         <section className="py-16 bg-black border-b border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-2xl font-bold text-white">Featured Products</h2>
-              <Link href="/listings" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
-                View all →
-              </Link>
+              <Link href="/listings" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">View all →</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(products as Product[]).map((product) => (
+              {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -80,15 +68,12 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* CTA */}
       <section className="py-20 bg-zinc-900 text-center border-t border-zinc-800">
         <div className="max-w-xl mx-auto px-4">
           <Image src="/logo.png" alt="DrivenByFaith3D" width={80} height={80} className="mx-auto mb-6 object-contain opacity-80" />
           <h2 className="text-3xl font-bold mb-4 text-white">Ready to print your idea?</h2>
           <p className="text-zinc-400 mb-8">Upload your file and get a quote within 24 hours.</p>
-          <Link href="/orders/new" className="btn-primary px-8 py-3">
-            Create Custom Order
-          </Link>
+          <Link href="/orders/new" className="btn-primary px-8 py-3">Create Custom Order</Link>
         </div>
       </section>
     </div>

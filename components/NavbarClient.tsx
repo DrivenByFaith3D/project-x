@@ -1,20 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
+import { signOut } from 'next-auth/react'
+
+interface User {
+  id: string
+  email: string
+  role: string
+}
 
 export default function NavbarClient({ user }: { user: User | null }) {
-  const router = useRouter()
-  const supabase = createClient()
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
-  }
-
   return (
     <div className="flex items-center gap-3">
       {user ? (
@@ -22,7 +17,10 @@ export default function NavbarClient({ user }: { user: User | null }) {
           <span className="text-sm text-zinc-500 hidden sm:block truncate max-w-[160px]">
             {user.email}
           </span>
-          <button onClick={handleSignOut} className="btn-secondary text-sm">
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="btn-secondary text-sm"
+          >
             Logout
           </button>
         </>

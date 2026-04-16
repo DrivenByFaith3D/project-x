@@ -1,20 +1,17 @@
-import type { Message } from '@/types'
-
-interface Props {
-  message: Message
-  isOwn: boolean
-  isAdmin: boolean
+interface ChatMessage {
+  id: string
+  senderId: string
+  content: string
+  fileUrl: string | null
+  createdAt: string
+  senderEmail: string
+  senderRole: string
 }
 
-export default function MessageBubble({ message, isOwn }: Props) {
-  const isAdminSender = message.profiles?.role === 'admin'
-  const senderLabel = isAdminSender
-    ? 'DrivenByFaith3D'
-    : message.profiles?.email?.split('@')[0] || 'You'
-
-  const time = new Date(message.created_at).toLocaleTimeString('en-US', {
-    hour: 'numeric', minute: '2-digit',
-  })
+export default function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolean }) {
+  const isAdminSender = message.senderRole === 'admin'
+  const senderLabel = isAdminSender ? 'DrivenByFaith3D' : message.senderEmail?.split('@')[0] || 'You'
+  const time = new Date(message.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
     <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
@@ -25,15 +22,13 @@ export default function MessageBubble({ message, isOwn }: Props) {
         <span className="text-xs text-zinc-600">{time}</span>
       </div>
       <div className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-        isOwn
-          ? 'bg-white text-black rounded-br-sm'
-          : isAdminSender
-          ? 'bg-zinc-700 text-white rounded-bl-sm'
-          : 'bg-zinc-800 text-white rounded-bl-sm'
+        isOwn ? 'bg-white text-black rounded-br-sm'
+        : isAdminSender ? 'bg-zinc-700 text-white rounded-bl-sm'
+        : 'bg-zinc-800 text-white rounded-bl-sm'
       }`}>
         {message.content}
-        {message.file_url && (
-          <a href={message.file_url} target="_blank" rel="noopener noreferrer"
+        {message.fileUrl && (
+          <a href={message.fileUrl} target="_blank" rel="noopener noreferrer"
             className={`mt-2 flex items-center gap-1 text-xs underline ${isOwn ? 'text-zinc-500' : 'text-zinc-400'}`}>
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

@@ -1,93 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { sendEmail, newMessageEmailHtml } from '@/lib/brevo'
 
-export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json()
-  const { orderId, content, fileUrl } = body
+  const orderId = req.nextUrl.searchParams.get('orderId')
+  if (!orderId) return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
 
-  if (!orderId || !content?.trim()) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
-  }
-
-  // Verify user has access to this order
-  const { data: order } = await supabase
-    .from('orders')
-    .select('user_id')
-    .eq('id', orderId)
-    .single()
-
-  if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, email')
-    .eq('id', user.id)
-    .single()
-
-  const isAdmin = profile?.role === 'admin'
-  if (!isAdmin && order.user_id !== user.id) {
+  const order = await prisma.order.findUnique({ where: { id: orderId } })
+  if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (session.user.role !== 'admin' && order.userId !== session.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // Insert message
-  const { data: message, error } = await supabase
-    .from('messages')
-    .insert({
-      order_id: orderId,
-      sender_id: user.id,
-      content: content.trim(),
-      file_url: fileUrl || null,
-    })
-    .select()
-    .single()
+  const messages = await prisma.message.findMany({
+    where: { orderId },
+    include: { sender: { select: { email: true, role: true } } },
+    orderBy: { createdAt: 'asc' },
+  })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(messages.map((m) => ({
+    id: m.id,
+    orderId: m.orderId,
+    senderId: m.senderId,
+    content: m.content,
+    fileUrl: m.fileUrl,
+    createdAt: m.createdAt.toISOString(),
+    senderEmail: m.sender.email,
+    senderRole: m.sender.role,
+  })))
+}
 
-  // Send email notification to the other participant
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { orderId, content, fileUrl } = await req.json()
+  if (!orderId || !content?.trim()) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { user: { select: { email: true } } },
+  })
+  if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const isAdmin = session.user.role === 'admin'
+  if (!isAdmin && order.userId !== session.user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const message = await prisma.message.create({
+    data: { orderId, senderId: session.user.id, content: content.trim(), fileUrl: fileUrl || null },
+  })
+
+  // Email notification (non-blocking)
   try {
-    const serviceClient = await createServiceClient()
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
+    const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
     if (isAdmin) {
-      // Admin sent → notify the order owner
-      const { data: ownerProfile } = await serviceClient
-        .from('profiles')
-        .select('email')
-        .eq('id', order.user_id)
-        .single()
-
-      if (ownerProfile?.email) {
+      await sendEmail({
+        to: order.user.email,
+        subject: 'New message on your order',
+        htmlContent: newMessageEmailHtml(orderId, appUrl),
+      })
+    } else {
+      const admins = await prisma.user.findMany({ where: { role: 'admin' }, select: { email: true } })
+      for (const admin of admins) {
         await sendEmail({
-          to: ownerProfile.email,
-          subject: 'New message on your order',
+          to: admin.email,
+          subject: `New message on order #${orderId.slice(0, 8).toUpperCase()}`,
           htmlContent: newMessageEmailHtml(orderId, appUrl),
         })
       }
-    } else {
-      // User sent → notify admin(s)
-      const { data: admins } = await serviceClient
-        .from('profiles')
-        .select('email')
-        .eq('role', 'admin')
-
-      for (const admin of admins || []) {
-        if (admin.email) {
-          await sendEmail({
-            to: admin.email,
-            subject: `New message on order #${orderId.slice(0, 8).toUpperCase()}`,
-            htmlContent: newMessageEmailHtml(orderId, appUrl),
-          })
-        }
-      }
     }
-  } catch (emailErr) {
-    // Email failure should not block message delivery
-    console.error('Email notification failed:', emailErr)
+  } catch (e) {
+    console.error('Email failed:', e)
   }
 
   return NextResponse.json(message)

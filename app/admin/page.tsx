@@ -1,20 +1,23 @@
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
 import AdminOrderRow from './AdminOrderRow'
-import type { Order } from '@/types'
 
 export default async function AdminPage() {
-  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  if (!session || session.user.role !== 'admin') redirect('/')
 
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*, profiles(email)')
-    .order('created_at', { ascending: false })
+  const orders = await prisma.order.findMany({
+    include: { user: { select: { email: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
 
   const counts = {
-    pending: orders?.filter((o) => o.status === 'pending').length || 0,
-    in_progress: orders?.filter((o) => o.status === 'in_progress').length || 0,
-    shipped: orders?.filter((o) => o.status === 'shipped').length || 0,
-    completed: orders?.filter((o) => o.status === 'completed').length || 0,
+    pending: orders.filter((o) => o.status === 'pending').length,
+    in_progress: orders.filter((o) => o.status === 'in_progress').length,
+    shipped: orders.filter((o) => o.status === 'shipped').length,
+    completed: orders.filter((o) => o.status === 'completed').length,
   }
 
   return (
@@ -51,13 +54,11 @@ export default async function AdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {orders?.map((order) => (
-                <AdminOrderRow key={order.id} order={order as Order} />
+              {orders.map((order) => (
+                <AdminOrderRow key={order.id} order={{ ...order, userEmail: order.user.email }} />
               ))}
-              {(!orders || orders.length === 0) && (
-                <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-zinc-600">No orders yet</td>
-                </tr>
+              {orders.length === 0 && (
+                <tr><td colSpan={5} className="px-5 py-10 text-center text-zinc-600">No orders yet</td></tr>
               )}
             </tbody>
           </table>

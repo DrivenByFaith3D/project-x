@@ -1,79 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { writeFile, mkdir } from 'fs/promises'
+import path from 'path'
 
-const MAX_SIZE_BYTES = 50 * 1024 * 1024 // 50MB
+const MAX_SIZE = 50 * 1024 * 1024 // 50MB
 
-export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const formData = await request.formData()
+  const formData = await req.formData()
   const file = formData.get('file') as File | null
   const orderId = formData.get('orderId') as string | null
 
-  if (!file || !orderId) {
-    return NextResponse.json({ error: 'Missing file or orderId' }, { status: 400 })
-  }
+  if (!file || !orderId) return NextResponse.json({ error: 'Missing file or orderId' }, { status: 400 })
+  if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File too large (max 50MB)' }, { status: 400 })
 
-  if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: 'File too large (max 50MB)' }, { status: 400 })
-  }
-
-  // Verify order access
-  const { data: order } = await supabase
-    .from('orders')
-    .select('user_id')
-    .eq('id', orderId)
-    .single()
-
+  const order = await prisma.order.findUnique({ where: { id: orderId } })
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin' && order.user_id !== user.id) {
+  if (session.user.role !== 'admin' && order.userId !== session.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const ext = file.name.split('.').pop()
-  const fileName = `${orderId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads', orderId)
 
+  await mkdir(uploadDir, { recursive: true })
   const bytes = await file.arrayBuffer()
-  const { error: storageError } = await supabase.storage
-    .from('order-files')
-    .upload(fileName, bytes, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false,
-    })
+  await writeFile(path.join(uploadDir, filename), Buffer.from(bytes))
 
-  if (storageError) {
-    return NextResponse.json({ error: storageError.message }, { status: 500 })
-  }
+  const url = `/uploads/${orderId}/${filename}`
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('order-files')
-    .getPublicUrl(fileName)
-
-  // Save file record to DB
-  const { error: dbError } = await supabase
-    .from('file_uploads')
-    .insert({ order_id: orderId, url: publicUrl, name: file.name })
-
-  if (dbError) {
-    return NextResponse.json({ error: dbError.message }, { status: 500 })
-  }
-
-  // Also send as a message with file attachment
-  await supabase.from('messages').insert({
-    order_id: orderId,
-    sender_id: user.id,
-    content: `Uploaded file: ${file.name}`,
-    file_url: publicUrl,
+  await prisma.fileUpload.create({ data: { orderId, url, name: file.name } })
+  await prisma.message.create({
+    data: { orderId, senderId: session.user.id, content: `Uploaded file: ${file.name}`, fileUrl: url },
   })
 
-  return NextResponse.json({ url: publicUrl, name: file.name })
+  return NextResponse.json({ url, name: file.name })
 }

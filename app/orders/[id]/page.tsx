@@ -1,8 +1,9 @@
 import { notFound, redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
-import type { Message, FileUpload, Order } from '@/types'
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-zinc-800 text-zinc-300',
@@ -13,71 +14,56 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  if (!session) redirect('/login')
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const isAdmin = session.user.role === 'admin'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  const isAdmin = profile?.role === 'admin'
-
-  const { data: order } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { files: true },
+  })
 
   if (!order) notFound()
-  if (!isAdmin && order.user_id !== user.id) notFound()
+  if (!isAdmin && order.userId !== session.user.id) notFound()
 
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('*, profiles(email, role)')
-    .eq('order_id', id)
-    .order('created_at', { ascending: true })
-
-  const { data: files } = await supabase
-    .from('file_uploads')
-    .select('*')
-    .eq('order_id', id)
-    .order('created_at', { ascending: false })
+  const messages = await prisma.message.findMany({
+    where: { orderId: id },
+    include: { sender: { select: { email: true, role: true } } },
+    orderBy: { createdAt: 'asc' },
+  })
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <p className="text-sm text-zinc-500">Order</p>
-          <h1 className="text-2xl font-bold text-white">#{(order as Order).id.slice(0, 8).toUpperCase()}</h1>
+          <h1 className="text-2xl font-bold text-white">#{order.id.slice(0, 8).toUpperCase()}</h1>
           <p className="text-sm text-zinc-500 mt-1">
-            Created {new Date((order as Order).created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Created {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <span className={`self-start sm:self-auto text-sm font-medium px-3 py-1.5 rounded-full capitalize ${STATUS_STYLES[(order as Order).status] || 'bg-zinc-800 text-zinc-300'}`}>
-          {(order as Order).status.replace('_', ' ')}
+        <span className={`self-start sm:self-auto text-sm font-medium px-3 py-1.5 rounded-full capitalize ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
+          {order.status.replace('_', ' ')}
         </span>
       </div>
 
       <div className="card p-5 mb-6">
         <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Description</h2>
-        <p className="text-zinc-200">{(order as Order).description}</p>
+        <p className="text-zinc-200">{order.description}</p>
       </div>
 
-      {(order as Order).status === 'shipped' && (order as Order).tracking_number && (
+      {order.status === 'shipped' && order.trackingNumber && (
         <div className="mb-6">
-          <ShippingStatus order={order as Order} />
+          <ShippingStatus order={order} />
         </div>
       )}
 
-      {files && files.length > 0 && (
+      {order.files.length > 0 && (
         <div className="card p-5 mb-6">
           <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Uploaded Files</h2>
           <div className="space-y-2">
-            {(files as FileUpload[]).map((file) => (
+            {order.files.map((file) => (
               <a key={file.id} href={file.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 transition-colors text-sm">
                 <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,8 +79,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       <ChatWindow
         orderId={id}
-        initialMessages={(messages as Message[]) || []}
-        currentUserId={user.id}
+        initialMessages={messages.map(m => ({
+          id: m.id,
+          orderId: m.orderId,
+          senderId: m.senderId,
+          content: m.content,
+          fileUrl: m.fileUrl,
+          createdAt: m.createdAt.toISOString(),
+          senderEmail: m.sender.email,
+          senderRole: m.sender.role,
+        }))}
+        currentUserId={session.user.id}
         isAdmin={isAdmin}
       />
     </div>

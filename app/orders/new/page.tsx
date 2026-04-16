@@ -2,32 +2,30 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useSession } from 'next-auth/react'
 
 export default function NewOrderPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const supabase = createClient()
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!session) { router.push('/login'); return }
     setError('')
     setLoading(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description }),
+    })
 
-    const { data: order, error } = await supabase
-      .from('orders')
-      .insert({ user_id: user.id, description, status: 'pending' })
-      .select()
-      .single()
-
-    if (error) { setError(error.message); setLoading(false); return }
-    router.push(`/orders/${order.id}`)
+    const data = await res.json()
+    if (!res.ok) { setError(data.error); setLoading(false); return }
+    router.push(`/orders/${data.id}`)
   }
 
   return (
@@ -68,7 +66,7 @@ export default function NewOrderPage() {
 
       <div className="mt-6 bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-sm text-zinc-400">
         <strong className="text-white">What happens next?</strong> Once you create your order, you&apos;ll be taken to a
-        dedicated chat where you can upload STL files, share reference images, and communicate directly with our team.
+        dedicated chat where you can upload STL files, share images, and communicate directly with our team.
       </div>
     </div>
   )

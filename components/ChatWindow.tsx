@@ -1,54 +1,50 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import MessageBubble from './MessageBubble'
 import FileUploader from './FileUploader'
-import type { Message } from '@/types'
+
+interface ChatMessage {
+  id: string
+  orderId: string
+  senderId: string
+  content: string
+  fileUrl: string | null
+  createdAt: string
+  senderEmail: string
+  senderRole: string
+}
 
 interface Props {
   orderId: string
-  initialMessages: Message[]
+  initialMessages: ChatMessage[]
   currentUserId: string
   isAdmin: boolean
 }
 
 export default function ChatWindow({ orderId, initialMessages, currentUserId, isAdmin }: Props) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
   const [showUploader, setShowUploader] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const supabase = createClient()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  useEffect(() => {
-    const channel = supabase
-      .channel(`messages:${orderId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}` },
-        async (payload) => {
-          const { data } = await supabase
-            .from('messages')
-            .select('*, profiles(email, role)')
-            .eq('id', payload.new.id)
-            .single()
-          if (data) {
-            setMessages((prev) => {
-              if (prev.find((m) => m.id === data.id)) return prev
-              return [...prev, data as Message]
-            })
-          }
-        }
-      )
-      .subscribe()
+  // Poll for new messages every 3 seconds
+  const poll = useCallback(async () => {
+    const res = await fetch(`/api/messages?orderId=${orderId}`)
+    if (!res.ok) return
+    const data: ChatMessage[] = await res.json()
+    setMessages(data)
+  }, [orderId])
 
-    return () => { supabase.removeChannel(channel) }
-  }, [orderId, supabase])
+  useEffect(() => {
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
+  }, [poll])
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
@@ -62,6 +58,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
     })
 
     setContent('')
+    await poll()
     setSending(false)
   }
 
@@ -76,10 +73,8 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
     <div className="card flex flex-col" style={{ height: '600px' }}>
       <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
         <h2 className="font-semibold text-white">Order Chat</h2>
-        <button
-          onClick={() => setShowUploader((v) => !v)}
-          className="text-sm text-zinc-400 hover:text-white font-medium flex items-center gap-1 transition-colors"
-        >
+        <button onClick={() => setShowUploader((v) => !v)}
+          className="text-sm text-zinc-400 hover:text-white font-medium flex items-center gap-1 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -90,7 +85,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
 
       {showUploader && (
         <div className="px-5 py-3 border-b border-zinc-800 bg-zinc-950">
-          <FileUploader orderId={orderId} onUploaded={() => setShowUploader(false)} />
+          <FileUploader orderId={orderId} onUploaded={() => { setShowUploader(false); poll() }} />
         </div>
       )}
 
@@ -101,21 +96,16 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
           </div>
         )}
         {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} isOwn={msg.sender_id === currentUserId} isAdmin={isAdmin} />
+          <MessageBubble key={msg.id} message={msg} isOwn={msg.senderId === currentUserId} />
         ))}
         <div ref={bottomRef} />
       </div>
 
       <form onSubmit={sendMessage} className="px-5 py-4 border-t border-zinc-800">
         <div className="flex gap-3 items-end">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="input resize-none flex-1"
-            rows={2}
-            placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
-          />
+          <textarea value={content} onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown} className="input resize-none flex-1" rows={2}
+            placeholder="Type a message… (Enter to send, Shift+Enter for new line)" />
           <button type="submit" disabled={sending || !content.trim()} className="btn-primary shrink-0 h-10 px-5">
             {sending ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

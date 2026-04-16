@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { Order, OrderStatus } from '@/types'
+
+type OrderStatus = 'pending' | 'in_progress' | 'completed' | 'shipped'
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-zinc-800 text-zinc-300',
@@ -13,6 +14,14 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'completed', 'shipped']
+
+interface Order {
+  id: string
+  status: string
+  description: string
+  createdAt: Date
+  userEmail: string
+}
 
 function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: () => void; onShipped: () => void }) {
   const [form, setForm] = useState({
@@ -29,73 +38,56 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-
+    setLoading(true); setError('')
     const res = await fetch('/api/shippo/create-label', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId, ...form }),
     })
-
     const data = await res.json()
-    if (!res.ok) { setError(data.error || 'Failed to create label'); setLoading(false); return }
-
-    onShipped()
-    onClose()
+    if (!res.ok) { setError(data.error || 'Failed'); setLoading(false); return }
+    onShipped(); onClose()
   }
 
   const inp = 'input text-xs py-1.5'
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
           <h3 className="font-semibold text-white">Create Shipping Label</h3>
           <button onClick={onClose} className="text-zinc-500 hover:text-white">✕</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-3">From Address</h4>
+            <h4 className="text-sm font-semibold text-zinc-300 mb-2">From Address</h4>
             <div className="grid grid-cols-2 gap-2">
-              <input placeholder="Name" className={inp} value={form.fromName} onChange={set('fromName')} required />
-              <input placeholder="Street" className={inp} value={form.fromStreet} onChange={set('fromStreet')} required />
-              <input placeholder="City" className={inp} value={form.fromCity} onChange={set('fromCity')} required />
-              <input placeholder="State (e.g. CA)" className={inp} value={form.fromState} onChange={set('fromState')} required />
-              <input placeholder="ZIP" className={inp} value={form.fromZip} onChange={set('fromZip')} required />
-              <input placeholder="Country (e.g. US)" className={inp} value={form.fromCountry} onChange={set('fromCountry')} required />
+              {(['fromName','fromStreet','fromCity','fromState','fromZip','fromCountry'] as const).map((f) => (
+                <input key={f} placeholder={f.replace('from','')} className={inp} value={form[f]} onChange={set(f)} required />
+              ))}
             </div>
           </div>
-
           <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-3">To Address</h4>
+            <h4 className="text-sm font-semibold text-zinc-300 mb-2">To Address</h4>
             <div className="grid grid-cols-2 gap-2">
-              <input placeholder="Name" className={inp} value={form.toName} onChange={set('toName')} required />
-              <input placeholder="Street" className={inp} value={form.toStreet} onChange={set('toStreet')} required />
-              <input placeholder="City" className={inp} value={form.toCity} onChange={set('toCity')} required />
-              <input placeholder="State (e.g. CA)" className={inp} value={form.toState} onChange={set('toState')} required />
-              <input placeholder="ZIP" className={inp} value={form.toZip} onChange={set('toZip')} required />
-              <input placeholder="Country (e.g. US)" className={inp} value={form.toCountry} onChange={set('toCountry')} required />
+              {(['toName','toStreet','toCity','toState','toZip','toCountry'] as const).map((f) => (
+                <input key={f} placeholder={f.replace('to','')} className={inp} value={form[f]} onChange={set(f)} required />
+              ))}
             </div>
           </div>
-
           <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-3">Parcel (inches / lbs)</h4>
+            <h4 className="text-sm font-semibold text-zinc-300 mb-2">Parcel (in / lb)</h4>
             <div className="grid grid-cols-4 gap-2">
-              <input placeholder="Length" className={inp} value={form.length} onChange={set('length')} type="number" min="0.1" step="0.1" required />
-              <input placeholder="Width" className={inp} value={form.width} onChange={set('width')} type="number" min="0.1" step="0.1" required />
-              <input placeholder="Height" className={inp} value={form.height} onChange={set('height')} type="number" min="0.1" step="0.1" required />
-              <input placeholder="Weight" className={inp} value={form.weight} onChange={set('weight')} type="number" min="0.1" step="0.1" required />
+              {(['length','width','height','weight'] as const).map((f) => (
+                <input key={f} placeholder={f} className={inp} value={form[f]} onChange={set(f)} type="number" min="0.1" step="0.1" required />
+              ))}
             </div>
           </div>
-
-          {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
-
-          <div className="flex gap-3 pt-2">
+          {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2">{error}</p>}
+          <div className="flex gap-3">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
             <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? 'Creating label…' : 'Create & Mark Shipped'}
+              {loading ? 'Creating…' : 'Create & Mark Shipped'}
             </button>
           </div>
         </form>
@@ -106,7 +98,7 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
 
 export default function AdminOrderRow({ order }: { order: Order }) {
   const router = useRouter()
-  const [status, setStatus] = useState<OrderStatus>(order.status)
+  const [status, setStatus] = useState<OrderStatus>(order.status as OrderStatus)
   const [showShipModal, setShowShipModal] = useState(false)
   const [updating, setUpdating] = useState(false)
 
@@ -122,8 +114,6 @@ export default function AdminOrderRow({ order }: { order: Order }) {
     setUpdating(false)
   }
 
-  function handleShipped() { setStatus('shipped'); router.refresh() }
-
   return (
     <>
       <tr className="hover:bg-zinc-800/50 transition-colors">
@@ -132,32 +122,26 @@ export default function AdminOrderRow({ order }: { order: Order }) {
             #{order.id.slice(0, 8).toUpperCase()}
           </Link>
         </td>
-        <td className="px-5 py-4 text-zinc-400">
-          {(order as Order & { profiles?: { email: string } }).profiles?.email || '—'}
-        </td>
+        <td className="px-5 py-4 text-zinc-400">{order.userEmail}</td>
         <td className="px-5 py-4">
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[status]}`}>
             {status.replace('_', ' ')}
           </span>
         </td>
         <td className="px-5 py-4 text-zinc-500">
-          {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </td>
         <td className="px-5 py-4">
-          <select
-            value={status}
-            onChange={(e) => updateStatus(e.target.value as OrderStatus)}
+          <select value={status} onChange={(e) => updateStatus(e.target.value as OrderStatus)}
             disabled={updating}
-            className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-white/30 disabled:opacity-50"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{s.replace('_', ' ')}</option>
-            ))}
+            className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
+            {STATUSES.map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
           </select>
         </td>
       </tr>
       {showShipModal && (
-        <ShipModal orderId={order.id} onClose={() => setShowShipModal(false)} onShipped={handleShipped} />
+        <ShipModal orderId={order.id} onClose={() => setShowShipModal(false)}
+          onShipped={() => { setStatus('shipped'); router.refresh() }} />
       )}
     </>
   )

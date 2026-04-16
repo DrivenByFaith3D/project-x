@@ -1,32 +1,39 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/orders'
+  const callbackUrl = searchParams.get('callbackUrl') || '/orders'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const supabase = createClient()
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); setLoading(false); return }
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
 
-    router.push(redirectTo)
+    if (res?.error) {
+      setError('Invalid email or password')
+      setLoading(false)
+      return
+    }
+
+    router.push(callbackUrl)
     router.refresh()
   }
 
