@@ -29,9 +29,6 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
   const [showUploader, setShowUploader] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
 
   // Poll for new messages every 3 seconds
   const poll = useCallback(async () => {
