@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import PasswordInput from '@/components/PasswordInput'
 
 interface User {
   id: string
@@ -12,14 +11,12 @@ interface User {
 }
 
 export default function UserRow({ user }: { user: User }) {
-  const [resetting, setResetting] = useState(false)
-  const [newPassword, setNewPassword] = useState('')
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleReset(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleReset() {
+    if (!confirm(`Reset password for ${user.email}? They will need to log in with "drivenbyfaith3d".`)) return
     setLoading(true)
     setSuccess('')
     setError('')
@@ -27,16 +24,14 @@ export default function UserRow({ user }: { user: User }) {
     const res = await fetch('/api/admin/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, newPassword }),
+      body: JSON.stringify({ userId: user.id }),
     })
 
     const data = await res.json()
     if (!res.ok) {
       setError(data.error)
     } else {
-      setSuccess('Password reset successfully.')
-      setNewPassword('')
-      setResetting(false)
+      setSuccess('Reset to "drivenbyfaith3d"')
     }
     setLoading(false)
   }
@@ -55,20 +50,9 @@ export default function UserRow({ user }: { user: User }) {
         {new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
       </td>
       <td className="px-5 py-4">
-        {resetting ? (
-          <form onSubmit={handleReset} className="flex items-center gap-2">
-            <PasswordInput value={newPassword} onChange={setNewPassword} placeholder="New password" minLength={6} required />
-            <button type="submit" disabled={loading} className="btn-primary text-xs px-3 py-1.5 whitespace-nowrap">
-              {loading ? '…' : 'Set'}
-            </button>
-            <button type="button" onClick={() => { setResetting(false); setError(''); setNewPassword('') }}
-              className="btn-secondary text-xs px-3 py-1.5">Cancel</button>
-          </form>
-        ) : (
-          <button onClick={() => setResetting(true)} className="btn-secondary text-xs px-3 py-1.5">
-            Reset Password
-          </button>
-        )}
+        <button onClick={handleReset} disabled={loading} className="btn-secondary text-xs px-3 py-1.5">
+          {loading ? '…' : 'Reset Password'}
+        </button>
         {success && <p className="text-xs text-green-400 mt-1">{success}</p>}
         {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
       </td>

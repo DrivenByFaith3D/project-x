@@ -27,7 +27,11 @@ export default function SignupPage() {
     })
 
     const data = await res.json()
-    if (!res.ok) { setError(data.error); setLoading(false); return }
+    if (!res.ok) {
+      setError(data.error === 'ACCOUNT_EXISTS' ? 'ACCOUNT_EXISTS' : data.error)
+      setLoading(false)
+      return
+    }
 
     // Auto sign in after signup
     await signIn('credentials', { email, password, redirect: false })
@@ -60,9 +64,17 @@ export default function SignupPage() {
             <PasswordInput value={password} onChange={setPassword} placeholder="At least 6 characters" minLength={6} required />
           </div>
 
-          {error && (
+          {error === 'ACCOUNT_EXISTS' ? (
+            <div className="text-sm bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-zinc-300">
+              An account with this email already exists.{' '}
+              <Link href="/login" className="text-white font-medium hover:underline">Sign in instead</Link>
+              <span className="block mt-1 text-zinc-500 text-xs">
+                Forgot your password? Contact us and we'll reset it for you.
+              </span>
+            </div>
+          ) : error ? (
             <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>
-          )}
+          ) : null}
 
           <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading ? 'Creating account…' : 'Create Account'}
