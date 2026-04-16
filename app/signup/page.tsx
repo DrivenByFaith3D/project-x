@@ -7,10 +7,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import PasswordInput from '@/components/PasswordInput'
 
-interface AddressSuggestion {
-  display_name: string
-  place_id: number
-}
 
 export default function SignupPage() {
   const router = useRouter()
@@ -18,7 +14,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [address, setAddress] = useState('')
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -51,8 +47,8 @@ export default function SignupPage() {
     }, 350)
   }
 
-  function selectSuggestion(s: AddressSuggestion) {
-    setAddress(s.display_name)
+  function selectSuggestion(s: string) {
+    setAddress(s)
     setSuggestions([])
     setShowSuggestions(false)
   }
@@ -122,14 +118,14 @@ export default function SignupPage() {
             />
             {showSuggestions && suggestions.length > 0 && (
               <ul className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden shadow-xl">
-                {suggestions.map((s) => (
-                  <li key={s.place_id}>
+                {suggestions.map((s, i) => (
+                  <li key={i}>
                     <button
                       type="button"
                       onClick={() => selectSuggestion(s)}
                       className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
                     >
-                      {s.display_name}
+                      {s}
                     </button>
                   </li>
                 ))}
