@@ -41,20 +41,17 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
-  const [form, setForm] = useState({
-    fromName: '', fromStreet: '', fromCity: '', fromState: '', fromZip: '', fromCountry: 'US',
-    toName: toAddress.name, toStreet: toAddress.street, toCity: toAddress.city,
-    toState: toAddress.state, toZip: toAddress.zip, toCountry: toAddress.country || 'US',
-    length: '6', width: '4', height: '3', weight: '1',
-  })
+  const FROM = { name: 'DrivenByFaith3D', street: '82 Fieldstone Dr', city: 'Springfield', state: 'NJ', zip: '07081', country: 'US' }
+
+  const [dims, setDims] = useState({ length: '6', width: '4', height: '3', weight: '1' })
   const [step, setStep] = useState<'form' | 'rates'>('form')
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  function set(field: string) {
-    return (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [field]: e.target.value }))
+  function setDim(field: string) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => setDims((d) => ({ ...d, [field]: e.target.value }))
   }
 
   async function fetchRates(e: React.FormEvent) {
@@ -63,7 +60,11 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
     const res = await fetch('/api/shippo/rates', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        fromName: FROM.name, fromStreet: FROM.street, fromCity: FROM.city, fromState: FROM.state, fromZip: FROM.zip, fromCountry: FROM.country,
+        toName: toAddress.name, toStreet: toAddress.street, toCity: toAddress.city, toState: toAddress.state, toZip: toAddress.zip, toCountry: toAddress.country || 'US',
+        ...dims,
+      }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed to fetch rates'); setLoading(false); return }
@@ -86,27 +87,21 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
     onShipped(); onClose()
   }
 
-  const field = (label: string, key: keyof typeof form, opts?: { type?: string; min?: string; step?: string; colSpan?: boolean }) => (
-    <div className={opts?.colSpan ? 'col-span-2' : ''}>
+  const dimField = (label: string, key: keyof typeof dims) => (
+    <div>
       <label className="block text-sm font-medium text-zinc-300 mb-1">{label}</label>
-      <input
-        className="input w-full"
-        value={form[key]}
-        onChange={set(key)}
-        type={opts?.type ?? 'text'}
-        min={opts?.min}
-        step={opts?.step}
-        required
-      />
+      <input className="input w-full" value={dims[key]} onChange={setDim(key)} type="number" min="0.1" step="0.1" required />
     </div>
   )
+
+  const hasToAddress = toAddress.street && toAddress.city && toAddress.state && toAddress.zip
 
   const modal = (
     <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center px-4 py-12">
-        <div className="card p-8 w-full max-w-lg">
+        <div className="card p-8 w-full max-w-md">
 
-          {/* Logo + title */}
+          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,9 +112,8 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
               {step === 'form' ? 'Create Shipping Label' : 'Choose a Carrier'}
             </h1>
             <p className="text-zinc-400 mt-1 text-sm">
-              {step === 'form' ? 'Enter the shipping details below' : 'Select the rate that works best for you'}
+              {step === 'form' ? 'Enter the package dimensions' : 'Select the rate that works best for you'}
             </p>
-            {/* Step indicator */}
             <div className="flex items-center justify-center gap-2 mt-4">
               <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'form' ? 'bg-white' : 'bg-zinc-700'}`} />
               <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'rates' ? 'bg-white' : 'bg-zinc-700'}`} />
@@ -128,43 +122,40 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
 
           {step === 'form' && (
             <form onSubmit={fetchRates} className="space-y-5">
+
+              {/* Address summary */}
+              <div className="rounded-lg border border-zinc-800 bg-zinc-800/40 p-4 space-y-3 text-sm">
+                <div className="flex gap-3">
+                  <span className="text-zinc-500 w-10 shrink-0">From</span>
+                  <span className="text-zinc-300">{FROM.street}, {FROM.city}, {FROM.state} {FROM.zip}</span>
+                </div>
+                <div className="border-t border-zinc-800" />
+                <div className="flex gap-3">
+                  <span className="text-zinc-500 w-10 shrink-0">To</span>
+                  {hasToAddress ? (
+                    <span className="text-zinc-300">
+                      {toAddress.street}, {toAddress.city}, {toAddress.state} {toAddress.zip}
+                    </span>
+                  ) : (
+                    <span className="text-amber-400 text-xs">No address on file for this customer</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Dimensions */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">From</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {field('Full Name', 'fromName', { colSpan: true })}
-                  {field('Street Address', 'fromStreet', { colSpan: true })}
-                  {field('City', 'fromCity')}
-                  {field('State', 'fromState')}
-                  {field('ZIP Code', 'fromZip')}
-                  {field('Country', 'fromCountry')}
-                </div>
-              </div>
-
-              <div className="border-t border-zinc-800 pt-5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">To</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {field('Full Name', 'toName', { colSpan: true })}
-                  {field('Street Address', 'toStreet', { colSpan: true })}
-                  {field('City', 'toCity')}
-                  {field('State', 'toState')}
-                  {field('ZIP Code', 'toZip')}
-                  {field('Country', 'toCountry')}
-                </div>
-              </div>
-
-              <div className="border-t border-zinc-800 pt-5">
                 <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">Package Dimensions</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {field('Length (in)', 'length', { type: 'number', min: '0.1', step: '0.1' })}
-                  {field('Width (in)', 'width', { type: 'number', min: '0.1', step: '0.1' })}
-                  {field('Height (in)', 'height', { type: 'number', min: '0.1', step: '0.1' })}
-                  {field('Weight (lb)', 'weight', { type: 'number', min: '0.1', step: '0.1' })}
+                  {dimField('Length (in)', 'length')}
+                  {dimField('Width (in)', 'width')}
+                  {dimField('Height (in)', 'height')}
+                  {dimField('Weight (lb)', 'weight')}
                 </div>
               </div>
 
               {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
 
-              <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
+              <button type="submit" disabled={loading || !hasToAddress} className="btn-primary w-full">
                 {loading ? 'Fetching rates…' : 'Get Shipping Rates'}
               </button>
               <button type="button" onClick={onClose} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
