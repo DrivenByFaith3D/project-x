@@ -7,7 +7,7 @@ export async function PATCH(req: NextRequest) {
   if (error) return error
 
   const { orderId, status } = await req.json()
-  const valid = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'completed', 'shipped']
+  const valid = ['pending', 'in_progress', 'completed', 'shipped']
   if (!orderId || !valid.includes(status)) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
