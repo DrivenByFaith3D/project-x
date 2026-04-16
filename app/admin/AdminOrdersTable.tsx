@@ -75,9 +75,9 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
 
   const field = (label: string, key: keyof typeof form, opts?: { type?: string; min?: string; step?: string; colSpan?: boolean }) => (
     <div className={opts?.colSpan ? 'col-span-2' : ''}>
-      <label className="block text-xs font-medium text-zinc-400 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-zinc-300 mb-1">{label}</label>
       <input
-        className="input text-sm py-2 w-full"
+        className="input w-full"
         value={form[key]}
         onChange={set(key)}
         type={opts?.type ?? 'text'}
@@ -89,135 +89,122 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
   )
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+      <div className="min-h-full flex items-center justify-center px-4 py-12">
+        <div className="card p-8 w-full max-w-lg">
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-          <h3 className="font-semibold text-white text-base">Create Shipping Label</h3>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs">
-              <span className={`flex items-center gap-1.5 ${step === 'form' ? 'text-white font-medium' : 'text-zinc-500'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step === 'form' ? 'bg-white text-black' : 'bg-zinc-700 text-zinc-400'}`}>1</span>
-                Details
-              </span>
-              <span className="text-zinc-700">——</span>
-              <span className={`flex items-center gap-1.5 ${step === 'rates' ? 'text-white font-medium' : 'text-zinc-500'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step === 'rates' ? 'bg-white text-black' : 'bg-zinc-700 text-zinc-400'}`}>2</span>
-                Choose Carrier
-              </span>
+          {/* Logo + title */}
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
             </div>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors text-lg leading-none">✕</button>
+            <h1 className="text-2xl font-bold text-white">
+              {step === 'form' ? 'Create Shipping Label' : 'Choose a Carrier'}
+            </h1>
+            <p className="text-zinc-400 mt-1 text-sm">
+              {step === 'form' ? 'Enter the shipping details below' : 'Select the rate that works best for you'}
+            </p>
+            {/* Step indicator */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'form' ? 'bg-white' : 'bg-zinc-700'}`} />
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'rates' ? 'bg-white' : 'bg-zinc-700'}`} />
+            </div>
           </div>
-        </div>
 
-        {step === 'form' && (
-          <form onSubmit={fetchRates} className="p-6 space-y-6">
+          {step === 'form' && (
+            <form onSubmit={fetchRates} className="space-y-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">From</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {field('Full Name', 'fromName', { colSpan: true })}
+                  {field('Street Address', 'fromStreet', { colSpan: true })}
+                  {field('City', 'fromCity')}
+                  {field('State', 'fromState')}
+                  {field('ZIP Code', 'fromZip')}
+                  {field('Country', 'fromCountry')}
+                </div>
+              </div>
 
-            {/* From Address */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">From</span>
-                <div className="flex-1 h-px bg-zinc-800" />
+              <div className="border-t border-zinc-800 pt-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">To</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {field('Full Name', 'toName', { colSpan: true })}
+                  {field('Street Address', 'toStreet', { colSpan: true })}
+                  {field('City', 'toCity')}
+                  {field('State', 'toState')}
+                  {field('ZIP Code', 'toZip')}
+                  {field('Country', 'toCountry')}
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {field('Full Name', 'fromName', { colSpan: true })}
-                {field('Street Address', 'fromStreet', { colSpan: true })}
-                {field('City', 'fromCity')}
-                {field('State', 'fromState')}
-                {field('ZIP Code', 'fromZip')}
-                {field('Country', 'fromCountry')}
-              </div>
-            </div>
 
-            {/* To Address */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">To</span>
-                <div className="flex-1 h-px bg-zinc-800" />
+              <div className="border-t border-zinc-800 pt-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">Package Dimensions</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {field('Length (in)', 'length', { type: 'number', min: '0.1', step: '0.1' })}
+                  {field('Width (in)', 'width', { type: 'number', min: '0.1', step: '0.1' })}
+                  {field('Height (in)', 'height', { type: 'number', min: '0.1', step: '0.1' })}
+                  {field('Weight (lb)', 'weight', { type: 'number', min: '0.1', step: '0.1' })}
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {field('Full Name', 'toName', { colSpan: true })}
-                {field('Street Address', 'toStreet', { colSpan: true })}
-                {field('City', 'toCity')}
-                {field('State', 'toState')}
-                {field('ZIP Code', 'toZip')}
-                {field('Country', 'toCountry')}
-              </div>
-            </div>
 
-            {/* Parcel */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Package</span>
-                <div className="flex-1 h-px bg-zinc-800" />
-              </div>
-              <div className="grid grid-cols-4 gap-3">
-                {field('Length (in)', 'length', { type: 'number', min: '0.1', step: '0.1' })}
-                {field('Width (in)', 'width', { type: 'number', min: '0.1', step: '0.1' })}
-                {field('Height (in)', 'height', { type: 'number', min: '0.1', step: '0.1' })}
-                {field('Weight (lb)', 'weight', { type: 'number', min: '0.1', step: '0.1' })}
-              </div>
-            </div>
+              {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
 
-            {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
-
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
-              <button type="submit" disabled={loading} className="btn-primary flex-1">
-                {loading ? 'Fetching rates…' : 'Get Shipping Rates →'}
+              <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
+                {loading ? 'Fetching rates…' : 'Get Shipping Rates'}
               </button>
-            </div>
-          </form>
-        )}
+              <button type="button" onClick={onClose} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+                Cancel
+              </button>
+            </form>
+          )}
 
-        {step === 'rates' && (
-          <div className="p-6 space-y-5">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Available Rates</span>
-                <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-xs text-zinc-600">{rates.length} option{rates.length !== 1 ? 's' : ''}</span>
-              </div>
-              <div className="space-y-2">
-                {rates.map((rate, i) => (
-                  <button
-                    key={rate.id}
-                    type="button"
-                    onClick={() => setSelectedRate(rate)}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-lg border text-left transition-all ${
-                      selectedRate?.id === rate.id
-                        ? 'border-zinc-400 bg-zinc-800 text-white'
-                        : 'border-zinc-800 bg-zinc-800/30 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-colors ${
-                        selectedRate?.id === rate.id ? 'border-white bg-white' : 'border-zinc-600'
-                      }`} />
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm">{rate.carrier}</span>
-                          {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-900/50 text-green-400 border border-green-800/50 rounded">Cheapest</span>}
-                        </div>
-                        <span className="text-zinc-400 text-xs mt-0.5">{rate.service}{rate.estimatedDays > 0 ? ` · Est. ${rate.estimatedDays} day${rate.estimatedDays !== 1 ? 's' : ''}` : ''}</span>
+          {step === 'rates' && (
+            <div className="space-y-3">
+              {rates.map((rate, i) => (
+                <button
+                  key={rate.id}
+                  type="button"
+                  onClick={() => setSelectedRate(rate)}
+                  className={`w-full flex items-center justify-between px-4 py-4 rounded-lg border text-left transition-all ${
+                    selectedRate?.id === rate.id
+                      ? 'border-zinc-400 bg-zinc-800 text-white'
+                      : 'border-zinc-800 bg-zinc-800/40 text-zinc-300 hover:border-zinc-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-colors ${
+                      selectedRate?.id === rate.id ? 'border-white bg-white' : 'border-zinc-600'
+                    }`} />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm">{rate.carrier}</span>
+                        {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-900/50 text-green-400 border border-green-800/50 rounded-full">Best price</span>}
                       </div>
+                      <p className="text-zinc-400 text-xs mt-0.5">
+                        {rate.service}{rate.estimatedDays > 0 ? ` · ${rate.estimatedDays} day${rate.estimatedDays !== 1 ? 's' : ''}` : ''}
+                      </p>
                     </div>
-                    <span className="font-bold text-base">${parseFloat(rate.amount).toFixed(2)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={() => { setStep('form'); setError('') }} className="btn-secondary flex-1">
-                ← Back
+                  </div>
+                  <span className="font-bold text-lg">${parseFloat(rate.amount).toFixed(2)}</span>
+                </button>
+              ))}
+
+              {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2 mt-2">{error}</p>}
+
+              <button type="button" onClick={purchaseLabel} disabled={loading || !selectedRate} className="btn-primary w-full mt-4">
+                {loading ? 'Purchasing label…' : 'Buy Label & Mark Shipped'}
               </button>
-              <button type="button" onClick={purchaseLabel} disabled={loading || !selectedRate} className="btn-primary flex-1">
-                {loading ? 'Purchasing…' : 'Buy Label & Mark Shipped'}
+              <button type="button" onClick={() => { setStep('form'); setError('') }} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+                ← Back to details
               </button>
             </div>
-          </div>
+          )}
+
+        </div>
+      </div>
+    </div>
         )}
       </div>
     </div>
