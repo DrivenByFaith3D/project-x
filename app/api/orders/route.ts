@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       data: {
         orderId: order.id,
         senderId: adminUser.id,
-        content: `Thank you for your order! We've received it and will review it shortly. We'll reach out to discuss details, pricing, and timeline. We appreciate your business! 🙏`,
+        content: `Thank you for your message! We've received it and will review it shortly. We'll reach out to discuss details, pricing, and timeline. We appreciate your interest! 🙏`,
       },
     })
   }
