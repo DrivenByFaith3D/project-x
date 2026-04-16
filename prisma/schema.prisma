@@ -59,6 +59,13 @@ model FileUpload {
   createdAt DateTime @default(now())
 }
 
+model PasswordResetRequest {
+  id        String   @id @default(cuid())
+  email     String
+  name      String
+  createdAt DateTime @default(now())
+}
+
 model Product {
   id          String   @id @default(cuid())
   name        String
