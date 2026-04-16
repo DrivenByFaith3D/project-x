@@ -396,6 +396,18 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
               )}
             </div>
           )}
+          {tab === 'delivered' && (
+            <div className="flex items-center gap-2">
+              <button onClick={() => doAction('archive')} disabled={busy}
+                className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40">
+                Archive
+              </button>
+              <button onClick={() => doAction('delete')} disabled={busy}
+                className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-1.5 py-1 rounded hover:bg-red-400/10 disabled:opacity-40">
+                Delete
+              </button>
+            </div>
+          )}
           {tab === 'archived' && (
             <button onClick={() => doAction('restore')} disabled={busy}
               className="text-xs text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500 disabled:opacity-40">
@@ -434,23 +446,25 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
   )
 }
 
-type Tab = 'active' | 'archived' | 'trash'
+type Tab = 'active' | 'delivered' | 'archived' | 'trash'
 
 export default function AdminOrdersTable({ initialOrders }: { initialOrders: Order[] }) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('active')
 
-  const active   = initialOrders.filter(o => !o.archivedAt && !o.deletedAt)
-  const archived = initialOrders.filter(o => !!o.archivedAt && !o.deletedAt)
-  const trash    = initialOrders.filter(o => !!o.deletedAt)
+  const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status !== 'delivered')
+  const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status === 'delivered')
+  const archived  = initialOrders.filter(o => !!o.archivedAt && !o.deletedAt)
+  const trash     = initialOrders.filter(o => !!o.deletedAt)
 
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: 'active',   label: 'Active',   count: active.length },
-    { id: 'archived', label: 'Archived', count: archived.length },
-    { id: 'trash',    label: 'Trash',    count: trash.length },
+    { id: 'active',    label: 'Active',    count: active.length },
+    { id: 'delivered', label: 'Delivered', count: delivered.length },
+    { id: 'archived',  label: 'Archived',  count: archived.length },
+    { id: 'trash',     label: 'Trash',     count: trash.length },
   ]
 
-  const rows = tab === 'active' ? active : tab === 'archived' ? archived : trash
+  const rows = tab === 'active' ? active : tab === 'delivered' ? delivered : tab === 'archived' ? archived : trash
 
   return (
     <div className="card overflow-hidden">
@@ -487,6 +501,12 @@ export default function AdminOrdersTable({ initialOrders }: { initialOrders: Ord
         </div>
       )}
 
+      {tab === 'delivered' && (
+        <div className="px-5 py-2.5 bg-green-950/30 border-b border-green-900/40 text-xs text-green-400">
+          Orders that have been delivered to the customer.
+        </div>
+      )}
+
       {tab === 'archived' && (
         <div className="px-5 py-2.5 bg-amber-950/30 border-b border-amber-900/40 text-xs text-amber-400">
           Archived orders are kept permanently and can be restored at any time.
@@ -511,7 +531,7 @@ export default function AdminOrdersTable({ initialOrders }: { initialOrders: Ord
             {rows.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-zinc-600">
-                  {tab === 'active' ? 'No active orders' : tab === 'archived' ? 'No archived orders' : 'Trash is empty'}
+                  {tab === 'active' ? 'No active orders' : tab === 'delivered' ? 'No delivered orders' : tab === 'archived' ? 'No archived orders' : 'Trash is empty'}
                 </td>
               </tr>
             )}
