@@ -23,6 +23,13 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetDone, setResetDone] = useState(false)
   const [resetError, setResetError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  function copyPassword() {
+    navigator.clipboard.writeText('drivenbyfaith3d')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -124,10 +131,28 @@ export default function LoginPage() {
             </div>
             <p className="text-white font-medium">Request sent!</p>
             <p className="text-sm text-zinc-400">
-              Your password has been reset. Sign in with the temporary password{' '}
-              <span className="font-mono text-white bg-zinc-800 px-1.5 py-0.5 rounded text-xs">drivenbyfaith3d</span>
-              {' '}and you'll be prompted to set a new one.
+              Your password has been reset. Sign in with the temporary password below and you'll be prompted to set a new one.
             </p>
+            <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 mt-2">
+              <span className="font-mono text-white text-base tracking-wide">drivenbyfaith3d</span>
+              <button onClick={copyPassword} className="ml-3 text-xs text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 shrink-0">
+                {copied ? (
+                  <>
+                    <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-green-400">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
             <button onClick={() => { setShowForgot(false); setResetDone(false) }}
               className="btn-secondary w-full mt-2">
               Back to sign in
