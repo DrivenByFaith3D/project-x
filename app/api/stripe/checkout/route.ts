@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!order.quote) return NextResponse.json({ error: 'No quote set for this order' }, { status: 400 })
   if (order.paymentStatus === 'paid') return NextResponse.json({ error: 'Already paid' }, { status: 400 })
 
-  const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  const appUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').trim()
 
   try {
     const stripe = getStripe()
