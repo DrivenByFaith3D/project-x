@@ -13,11 +13,20 @@ export default async function AdminOrdersPage() {
   await prisma.order.deleteMany({ where: { deletedAt: { not: null, lte: cutoff } } })
 
   const orders = await prisma.order.findMany({
-    include: { user: { select: { email: true } } },
+    include: { user: { select: { email: true, name: true, addressStreet: true, addressCity: true, addressState: true, addressZip: true, addressCountry: true } } },
     orderBy: { createdAt: 'desc' },
   })
 
-  const tableOrders = orders.map((o) => ({ ...o, userEmail: o.user.email }))
+  const tableOrders = orders.map((o) => ({
+    ...o,
+    userEmail: o.user.email,
+    userName: o.user.name ?? '',
+    userAddressStreet: o.user.addressStreet ?? '',
+    userAddressCity: o.user.addressCity ?? '',
+    userAddressState: o.user.addressState ?? '',
+    userAddressZip: o.user.addressZip ?? '',
+    userAddressCountry: o.user.addressCountry ?? 'US',
+  }))
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

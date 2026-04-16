@@ -18,6 +18,12 @@ interface Order {
   archivedAt?: Date | null
   deletedAt?: Date | null
   userEmail: string
+  userName?: string
+  userAddressStreet?: string
+  userAddressCity?: string
+  userAddressState?: string
+  userAddressZip?: string
+  userAddressCountry?: string
 }
 
 interface Rate {
@@ -29,13 +35,16 @@ interface Rate {
   estimatedDays: number
 }
 
-function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: () => void; onShipped: () => void }) {
+interface ToAddress { name: string; street: string; city: string; state: string; zip: string; country: string }
+
+function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string; toAddress: ToAddress; onClose: () => void; onShipped: () => void }) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
   const [form, setForm] = useState({
     fromName: '', fromStreet: '', fromCity: '', fromState: '', fromZip: '', fromCountry: 'US',
-    toName: '', toStreet: '', toCity: '', toState: '', toZip: '', toCountry: 'US',
+    toName: toAddress.name, toStreet: toAddress.street, toCity: toAddress.city,
+    toState: toAddress.state, toZip: toAddress.zip, toCountry: toAddress.country || 'US',
     length: '6', width: '4', height: '3', weight: '1',
   })
   const [step, setStep] = useState<'form' | 'rates'>('form')
@@ -313,8 +322,19 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
         </td>
       </tr>
       {showShipModal && (
-        <ShipModal orderId={order.id} onClose={() => setShowShipModal(false)}
-          onShipped={() => { setStatus('shipped'); router.refresh() }} />
+        <ShipModal
+          orderId={order.id}
+          toAddress={{
+            name: order.userName || '',
+            street: order.userAddressStreet || '',
+            city: order.userAddressCity || '',
+            state: order.userAddressState || '',
+            zip: order.userAddressZip || '',
+            country: order.userAddressCountry || 'US',
+          }}
+          onClose={() => setShowShipModal(false)}
+          onShipped={() => { setStatus('shipped'); router.refresh() }}
+        />
       )}
     </>
   )

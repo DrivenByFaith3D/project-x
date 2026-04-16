@@ -6,14 +6,17 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import PasswordInput from '@/components/PasswordInput'
-import AddressAutocomplete from '@/components/AddressAutocomplete'
 
 export default function SignupPage() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [address, setAddress] = useState('')
+  const [addressStreet, setAddressStreet] = useState('')
+  const [addressCity, setAddressCity] = useState('')
+  const [addressState, setAddressState] = useState('')
+  const [addressZip, setAddressZip] = useState('')
+  const [addressCountry, setAddressCountry] = useState('US')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -25,7 +28,7 @@ export default function SignupPage() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, address }),
+      body: JSON.stringify({ email, password, name, addressStreet, addressCity, addressState, addressZip, addressCountry }),
     })
 
     const data = await res.json()
@@ -65,15 +68,44 @@ export default function SignupPage() {
             <PasswordInput value={password} onChange={setPassword} placeholder="At least 6 characters" minLength={6} required />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1">
+          {/* Shipping Address */}
+          <div className="border-t border-zinc-800 pt-4">
+            <p className="text-sm font-medium text-zinc-300 mb-0.5">
               Shipping Address
               <span className="ml-2 text-xs font-normal text-zinc-500">(optional)</span>
-            </label>
-            <AddressAutocomplete value={address} onChange={setAddress} />
-            <p className="mt-1.5 text-xs text-zinc-500">
-              Used to ship your completed prints directly to you.
             </p>
+            <p className="text-xs text-zinc-500 mb-3">Used to ship your completed prints directly to you.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Street Address</label>
+                <input type="text" value={addressStreet} onChange={(e) => setAddressStreet(e.target.value)}
+                  className="input" placeholder="123 Main St, Apt 4B" autoComplete="street-address" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">City</label>
+                  <input type="text" value={addressCity} onChange={(e) => setAddressCity(e.target.value)}
+                    className="input" placeholder="Los Angeles" autoComplete="address-level2" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">State</label>
+                  <input type="text" value={addressState} onChange={(e) => setAddressState(e.target.value)}
+                    className="input" placeholder="CA" maxLength={2} autoComplete="address-level1" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">ZIP Code</label>
+                  <input type="text" value={addressZip} onChange={(e) => setAddressZip(e.target.value)}
+                    className="input" placeholder="90001" autoComplete="postal-code" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Country</label>
+                  <input type="text" value={addressCountry} onChange={(e) => setAddressCountry(e.target.value)}
+                    className="input" placeholder="US" maxLength={2} autoComplete="country" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {error === 'ACCOUNT_EXISTS' ? (

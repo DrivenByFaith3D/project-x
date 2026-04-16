@@ -14,7 +14,11 @@ model User {
   name      String?
   role               String   @default("user")
   mustChangePassword Boolean  @default(false)
-  address            String?
+  addressStreet      String?
+  addressCity        String?
+  addressState       String?
+  addressZip         String?
+  addressCountry     String?  @default("US")
   createdAt          DateTime @default(now())
 
   orders   Order[]
