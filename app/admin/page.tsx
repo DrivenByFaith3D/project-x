@@ -2,8 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import AdminOrdersTable from './AdminOrdersTable'
-import UserRow from './UserRow'
+import AdminTabs from './AdminTabs'
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
@@ -50,33 +49,7 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      <AdminOrdersTable initialOrders={tableOrders} />
-
-      {/* Users Table */}
-      <div className="card overflow-hidden mt-10">
-        <div className="px-5 py-4 border-b border-zinc-800">
-          <h2 className="font-semibold text-white">All Users</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
-              <tr>
-                <th className="px-5 py-3 text-left">Name</th>
-                <th className="px-5 py-3 text-left">Email</th>
-                <th className="px-5 py-3 text-left">Role</th>
-                <th className="px-5 py-3 text-left">Password</th>
-                <th className="px-5 py-3 text-left">Joined</th>
-                <th className="px-5 py-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {users.map((user) => (
-                <UserRow key={user.id} user={user} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AdminTabs orders={tableOrders} users={users} />
     </div>
   )
 }
