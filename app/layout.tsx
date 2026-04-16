@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Providers from '@/components/Providers'
+import PasswordChangeGate from '@/components/PasswordChangeGate'
 
 export const metadata: Metadata = {
   title: 'DrivenByFaith3D',
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col bg-black text-white">
         <Providers>
           <Navbar />
+          <PasswordChangeGate />
           <main className="flex-1">{children}</main>
           <footer className="bg-zinc-950 border-t border-zinc-800 text-zinc-500 text-sm text-center py-6 mt-auto">
             © {new Date().getFullYear()} DrivenByFaith3D. All rights reserved.

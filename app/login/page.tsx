@@ -124,7 +124,9 @@ export default function LoginPage() {
             </div>
             <p className="text-white font-medium">Request sent!</p>
             <p className="text-sm text-zinc-400">
-              We received your request. Once we verify your info, we'll reset your password and you'll be able to log in.
+              Your password has been reset. Sign in with the temporary password{' '}
+              <span className="font-mono text-white bg-zinc-800 px-1.5 py-0.5 rounded text-xs">drivenbyfaith3d</span>
+              {' '}and you'll be prompted to set a new one.
             </p>
             <button onClick={() => { setShowForgot(false); setResetDone(false) }}
               className="btn-secondary w-full mt-2">
