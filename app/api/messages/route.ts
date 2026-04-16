@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   const messages = await prisma.message.findMany({
     where: { orderId },
-    include: { sender: { select: { email: true, role: true } } },
+    include: { sender: { select: { email: true, role: true, name: true } } },
     orderBy: { createdAt: 'asc' },
   })
 
@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     fileUrl: m.fileUrl,
     createdAt: m.createdAt.toISOString(),
     senderEmail: m.sender.email,
+    senderName: m.sender.name,
     senderRole: m.sender.role,
   })))
 }

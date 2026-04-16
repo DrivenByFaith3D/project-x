@@ -23,7 +23,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const messages = await prisma.message.findMany({
     where: { orderId: id },
-    include: { sender: { select: { email: true, role: true } } },
+    include: { sender: { select: { email: true, role: true, name: true } } },
     orderBy: { createdAt: 'asc' },
   })
 
@@ -81,6 +81,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           fileUrl: m.fileUrl,
           createdAt: m.createdAt.toISOString(),
           senderEmail: m.sender.email,
+          senderName: m.sender.name,
           senderRole: m.sender.role,
         }))}
         currentUserId={session.user.id}

@@ -9,6 +9,7 @@ interface ChatMessage {
   fileUrl: string | null
   createdAt: string
   senderEmail: string
+  senderName: string | null
   senderRole: string
 }
 
@@ -22,7 +23,7 @@ interface Props {
 
 export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, onDelete }: Props) {
   const isAdminSender = message.senderRole === 'admin'
-  const senderLabel = isAdminSender ? 'DrivenByFaith3D' : message.senderEmail?.split('@')[0] || 'You'
+  const senderLabel = isAdminSender ? 'DrivenByFaith3D' : message.senderName || message.senderEmail?.split('@')[0] || 'You'
   const time = new Date(message.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
   const isOptimistic = message.id.startsWith('optimistic-')
 

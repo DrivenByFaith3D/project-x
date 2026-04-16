@@ -12,6 +12,7 @@ interface ChatMessage {
   fileUrl: string | null
   createdAt: string
   senderEmail: string
+  senderName: string | null
   senderRole: string
 }
 
@@ -99,6 +100,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
       fileUrl: null,
       createdAt: new Date().toISOString(),
       senderEmail: '',
+      senderName: null,
       senderRole: isAdmin ? 'admin' : 'user',
     }
     setMessages((prev) => [...prev, optimistic])
