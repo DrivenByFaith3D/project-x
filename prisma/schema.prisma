@@ -38,6 +38,9 @@ model Order {
   trackingStatus String?
   trackingUrl    String?
   labelUrl       String?
+  quote          Float?
+  paymentStatus  String?
+  stripeSessionId String?
   createdAt      DateTime @default(now())
   archivedAt     DateTime?
   deletedAt      DateTime?

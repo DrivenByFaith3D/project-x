@@ -17,6 +17,8 @@ interface Order {
   createdAt: Date
   archivedAt?: Date | null
   deletedAt?: Date | null
+  quote?: number | null
+  paymentStatus?: string | null
   userEmail: string
   userName?: string
   userAddressStreet?: string
@@ -266,6 +268,25 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
   const [status, setStatus] = useState<OrderStatus>(order.status as OrderStatus)
   const [showShipModal, setShowShipModal] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [showQuoteInput, setShowQuoteInput] = useState(false)
+  const [quoteValue, setQuoteValue] = useState(order.quote ? String(order.quote) : '')
+  const [quote, setQuote] = useState<number | null | undefined>(order.quote)
+  const [paymentStatus, setPaymentStatus] = useState(order.paymentStatus)
+
+  async function saveQuote() {
+    const amount = parseFloat(quoteValue)
+    if (isNaN(amount) || amount <= 0) return
+    setBusy(true)
+    await fetch('/api/orders/quote', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: order.id, quote: amount }),
+    })
+    setQuote(amount)
+    setPaymentStatus('unpaid')
+    setShowQuoteInput(false)
+    setBusy(false)
+  }
 
   async function updateStatus(newStatus: OrderStatus) {
     setBusy(true)
@@ -312,29 +333,67 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
         </td>
         <td className="px-5 py-4">
           {tab === 'active' && (
-            <div className="flex items-center gap-2">
-              <select value={status} onChange={(e) => updateStatus(e.target.value as OrderStatus)}
-                disabled={busy}
-                className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
-                {STATUSES.map((s) => (
-                <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
-              ))}
-              </select>
-              <button onClick={() => setShowShipModal(true)} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-blue-400 transition-colors px-1.5 py-1 rounded hover:bg-blue-400/10 disabled:opacity-40"
-                title="Create shipping label">
-                Ship Label
-              </button>
-              <button onClick={() => doAction('archive')} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40"
-                title="Archive">
-                Archive
-              </button>
-              <button onClick={() => doAction('delete')} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-1.5 py-1 rounded hover:bg-red-400/10 disabled:opacity-40"
-                title="Move to trash">
-                Delete
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <select value={status} onChange={(e) => updateStatus(e.target.value as OrderStatus)}
+                  disabled={busy}
+                  className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
+                  {STATUSES.map((s) => (
+                  <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
+                ))}
+                </select>
+                <button onClick={() => setShowShipModal(true)} disabled={busy}
+                  className="text-xs text-zinc-500 hover:text-blue-400 transition-colors px-1.5 py-1 rounded hover:bg-blue-400/10 disabled:opacity-40"
+                  title="Create shipping label">
+                  Ship Label
+                </button>
+                <button onClick={() => doAction('archive')} disabled={busy}
+                  className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40"
+                  title="Archive">
+                  Archive
+                </button>
+                <button onClick={() => doAction('delete')} disabled={busy}
+                  className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-1.5 py-1 rounded hover:bg-red-400/10 disabled:opacity-40"
+                  title="Move to trash">
+                  Delete
+                </button>
+              </div>
+              {/* Quote row */}
+              {showQuoteInput ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-zinc-500">$</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={quoteValue}
+                    onChange={(e) => setQuoteValue(e.target.value)}
+                    className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 w-20 focus:outline-none focus:border-zinc-500"
+                    placeholder="0.00"
+                    autoFocus
+                  />
+                  <button onClick={saveQuote} disabled={busy}
+                    className="text-xs text-green-400 hover:text-green-300 px-1.5 py-1 rounded hover:bg-green-400/10 disabled:opacity-40">
+                    Save
+                  </button>
+                  <button onClick={() => setShowQuoteInput(false)}
+                    className="text-xs text-zinc-500 hover:text-zinc-300 px-1.5 py-1 rounded hover:bg-zinc-700">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {quote ? (
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${paymentStatus === 'paid' ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'}`}>
+                      {paymentStatus === 'paid' ? `Paid $${quote.toFixed(2)}` : `Quote: $${quote.toFixed(2)} — Unpaid`}
+                    </span>
+                  ) : null}
+                  <button onClick={() => setShowQuoteInput(true)} disabled={busy}
+                    className="text-xs text-zinc-500 hover:text-green-400 transition-colors px-1.5 py-1 rounded hover:bg-green-400/10 disabled:opacity-40">
+                    {quote ? 'Edit Quote' : 'Set Quote'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {tab === 'archived' && (

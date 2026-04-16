@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
+import PayButton from '@/components/PayButton'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -57,6 +58,29 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Description</h2>
         <p className="text-zinc-200">{order.description}</p>
       </div>
+
+      {!isAdmin && order.quote && order.paymentStatus !== 'paid' && (
+        <div className="card p-5 mb-6 border border-yellow-800/50 bg-yellow-950/20">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Quote Ready</h2>
+              <p className="text-zinc-400 text-sm mt-0.5">Your order has been quoted at <span className="text-white font-semibold">${order.quote.toFixed(2)}</span>. Pay to get started.</p>
+            </div>
+            <PayButton orderId={order.id} amount={order.quote} />
+          </div>
+        </div>
+      )}
+
+      {!isAdmin && order.paymentStatus === 'paid' && order.quote && (
+        <div className="card p-5 mb-6 border border-green-800/50 bg-green-950/20">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm text-green-300">Payment of <span className="font-semibold">${order.quote.toFixed(2)}</span> received — your order is in progress.</p>
+          </div>
+        </div>
+      )}
 
       {['label_created', 'in_transit', 'out_for_delivery', 'delivered'].includes(order.status) && order.trackingNumber && (
         <div className="mb-6">
