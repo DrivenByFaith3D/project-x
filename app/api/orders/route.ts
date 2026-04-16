@@ -32,5 +32,17 @@ export async function POST(req: NextRequest) {
     },
   })
 
+  // Post an automatic welcome message from the admin account
+  const adminUser = await prisma.user.findFirst({ where: { role: 'admin' } })
+  if (adminUser) {
+    await prisma.message.create({
+      data: {
+        orderId: order.id,
+        senderId: adminUser.id,
+        content: `Thank you for your order! We've received it and will review it shortly. We'll reach out to discuss details, pricing, and timeline. We appreciate your business! 🙏`,
+      },
+    })
+  }
+
   return NextResponse.json(order)
 }
