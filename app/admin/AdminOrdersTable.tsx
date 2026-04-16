@@ -43,7 +43,7 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
 
   const FROM = { name: 'DrivenByFaith3D', street: '82 Fieldstone Dr', city: 'Springfield', state: 'NJ', zip: '07081', country: 'US' }
 
-  const [dims, setDims] = useState({ length: '6', width: '4', height: '3', weight: '1' })
+  const [dims, setDims] = useState({ length: '6', width: '4', height: '3', weightLb: '1', weightOz: '0' })
   const [step, setStep] = useState<'form' | 'rates'>('form')
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
@@ -63,7 +63,8 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
       body: JSON.stringify({
         fromName: FROM.name, fromStreet: FROM.street, fromCity: FROM.city, fromState: FROM.state, fromZip: FROM.zip, fromCountry: FROM.country,
         toName: toAddress.name, toStreet: toAddress.street, toCity: toAddress.city, toState: toAddress.state, toZip: toAddress.zip, toCountry: toAddress.country || 'US',
-        ...dims,
+        length: dims.length, width: dims.width, height: dims.height,
+        weight: (parseFloat(dims.weightLb || '0') + parseFloat(dims.weightOz || '0') / 16).toFixed(4),
       }),
     })
     const data = await res.json()
@@ -87,10 +88,10 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
     onShipped(); onClose()
   }
 
-  const dimField = (label: string, key: keyof typeof dims) => (
+  const dimField = (label: string, key: keyof typeof dims, opts?: { min?: string; step?: string }) => (
     <div>
       <label className="block text-sm font-medium text-zinc-300 mb-1">{label}</label>
-      <input className="input w-full" value={dims[key]} onChange={setDim(key)} type="number" min="0.1" step="0.1" required />
+      <input className="input w-full" value={dims[key]} onChange={setDim(key)} type="number" min={opts?.min ?? '0'} step={opts?.step ?? '1'} required />
     </div>
   )
 
@@ -146,10 +147,22 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">Package Dimensions</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {dimField('Length (in)', 'length')}
-                  {dimField('Width (in)', 'width')}
-                  {dimField('Height (in)', 'height')}
-                  {dimField('Weight (lb)', 'weight')}
+                  {dimField('Length (in)', 'length', { min: '0.1', step: '0.1' })}
+                  {dimField('Width (in)', 'width', { min: '0.1', step: '0.1' })}
+                  {dimField('Height (in)', 'height', { min: '0.1', step: '0.1' })}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Weight</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative">
+                        <input className="input w-full pr-8" value={dims.weightLb} onChange={setDim('weightLb')} type="number" min="0" step="1" required />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">lb</span>
+                      </div>
+                      <div className="relative">
+                        <input className="input w-full pr-8" value={dims.weightOz} onChange={setDim('weightOz')} type="number" min="0" max="15" step="1" required />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">oz</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
