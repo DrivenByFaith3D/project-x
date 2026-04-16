@@ -24,32 +24,38 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
-  const stripe = getStripe()
-  const checkoutSession = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `3D Print Order ${formatOrderId(order)}`,
-            description: order.description.slice(0, 200),
+  try {
+    const stripe = getStripe()
+    const checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `3D Print Order ${formatOrderId(order)}`,
+              description: order.description.slice(0, 200),
+            },
+            unit_amount: Math.round(order.quote * 100),
           },
-          unit_amount: Math.round(order.quote * 100),
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: `${appUrl}/orders/${orderId}/payment-success`,
-    cancel_url: `${appUrl}/orders/${orderId}/payment-cancel`,
-    metadata: { orderId },
-  })
+      ],
+      mode: 'payment',
+      success_url: `${appUrl}/orders/${orderId}/payment-success`,
+      cancel_url: `${appUrl}/orders/${orderId}/payment-cancel`,
+      metadata: { orderId },
+    })
 
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { stripeSessionId: checkoutSession.id },
-  })
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { stripeSessionId: checkoutSession.id },
+    })
 
-  return NextResponse.json({ url: checkoutSession.url })
+    return NextResponse.json({ url: checkoutSession.url })
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Stripe error'
+    console.error('Stripe checkout error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
