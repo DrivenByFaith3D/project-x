@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 interface Order {
+  id: string
   trackingNumber: string | null
   carrier: string | null
   trackingUrl: string | null
@@ -34,7 +35,7 @@ export default function ShippingStatus({ order }: { order: Order }) {
       if (!order.trackingNumber || !order.carrier) { setLoading(false); return }
       try {
         const res = await fetch(
-          `/api/shippo/track?carrier=${encodeURIComponent(order.carrier)}&tracking_number=${encodeURIComponent(order.trackingNumber)}`
+          `/api/shippo/track?carrier=${encodeURIComponent(order.carrier)}&tracking_number=${encodeURIComponent(order.trackingNumber)}&order_id=${encodeURIComponent(order.id)}`
         )
         const data = await res.json()
         if (res.ok) setTracking(data)

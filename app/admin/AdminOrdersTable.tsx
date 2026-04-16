@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
+import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
-type OrderStatus = 'pending' | 'in_progress' | 'completed' | 'shipped'
-const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'completed', 'shipped']
+type OrderStatus = 'pending' | 'in_progress' | 'label_created' | 'in_transit' | 'out_for_delivery' | 'delivered'
+const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered']
 
 interface Order {
   id: string
@@ -271,8 +271,8 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
         </td>
         <td className="px-5 py-4 text-zinc-400">{order.userEmail}</td>
         <td className="px-5 py-4">
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[status]}`}>
-            {status.replace('_', ' ')}
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[status] ?? 'bg-zinc-800 text-zinc-300'}`}>
+            {STATUS_LABELS[status] ?? status}
           </span>
         </td>
         <td className="px-5 py-4 text-zinc-500">
@@ -285,9 +285,7 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
                 disabled={busy}
                 className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
                 {STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                </option>
+                <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
               ))}
               </select>
               <button onClick={() => setShowShipModal(true)} disabled={busy}
@@ -338,7 +336,7 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
             country: order.userAddressCountry || 'US',
           }}
           onClose={() => setShowShipModal(false)}
-          onShipped={() => { setStatus('shipped'); router.refresh() }}
+          onShipped={() => { setStatus('label_created'); router.refresh() }}
         />
       )}
     </>

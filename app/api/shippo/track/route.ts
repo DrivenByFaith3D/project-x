@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTrackingStatus } from '@/lib/shippo'
 import { requireAuth } from '@/lib/api'
+import { prisma } from '@/lib/prisma'
+import { SHIPPO_STATUS_MAP } from '@/lib/constants'
 
 export async function GET(req: NextRequest) {
   const { error } = await requireAuth()
@@ -8,16 +10,29 @@ export async function GET(req: NextRequest) {
 
   const carrier = req.nextUrl.searchParams.get('carrier')
   const trackingNumber = req.nextUrl.searchParams.get('tracking_number')
+  const orderId = req.nextUrl.searchParams.get('order_id')
+
   if (!carrier || !trackingNumber) {
     return NextResponse.json({ error: 'Missing params' }, { status: 400 })
   }
 
   try {
     const raw = await getTrackingStatus(carrier, trackingNumber)
+    const shippoStatus = raw.tracking_status?.status
+
+    // Auto-update order status based on Shippo tracking
+    if (orderId && shippoStatus && SHIPPO_STATUS_MAP[shippoStatus]) {
+      const newStatus = SHIPPO_STATUS_MAP[shippoStatus]
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { status: newStatus, trackingStatus: shippoStatus },
+      }).catch(() => {}) // silent fail — don't block tracking response
+    }
+
     return NextResponse.json({
       carrier: raw.carrier,
       tracking_number: raw.tracking_number,
-      status: raw.tracking_status?.status || 'unknown',
+      status: shippoStatus || 'unknown',
       eta: raw.eta || null,
       tracking_url: raw.tracking_url_provider || null,
       tracking_history: (raw.tracking_history || []).map((e: {

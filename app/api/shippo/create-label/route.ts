@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     await prisma.order.update({
       where: { id: orderId },
       data: {
-        status: 'shipped',
+        status: 'label_created',
         trackingNumber: transaction.tracking_number,
         carrier: carrier?.toLowerCase() || 'usps',
         trackingUrl: transaction.tracking_url_provider,
