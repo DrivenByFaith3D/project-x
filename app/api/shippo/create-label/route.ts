@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createShipment, purchaseLabel } from '@/lib/shippo'
+import { requireAdmin } from '@/lib/api'
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const { error } = await requireAdmin()
+  if (error) return error
 
   const body = await req.json()
   const { orderId, fromName, fromStreet, fromCity, fromState, fromZip, fromCountry,

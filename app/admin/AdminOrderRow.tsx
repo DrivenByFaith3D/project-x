@@ -3,15 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
 
 type OrderStatus = 'pending' | 'in_progress' | 'completed' | 'shipped'
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-zinc-800 text-zinc-300',
-  in_progress: 'bg-zinc-700 text-white',
-  completed: 'bg-white text-black',
-  shipped: 'bg-zinc-300 text-black',
-}
 
 const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'completed', 'shipped']
 
@@ -119,7 +113,7 @@ export default function AdminOrderRow({ order }: { order: Order }) {
       <tr className="hover:bg-zinc-800/50 transition-colors">
         <td className="px-5 py-4">
           <Link href={`/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
-            #{order.id.slice(0, 8).toUpperCase()}
+            {formatOrderId(order.id)}
           </Link>
         </td>
         <td className="px-5 py-4 text-zinc-400">{order.userEmail}</td>

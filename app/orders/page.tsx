@@ -3,13 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-zinc-800 text-zinc-300',
-  in_progress: 'bg-zinc-700 text-white',
-  completed: 'bg-white text-black',
-  shipped: 'bg-zinc-300 text-black',
-}
+import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
 
 export default async function OrdersPage() {
   const session = await getServerSession(authOptions)
@@ -46,7 +40,7 @@ export default async function OrdersPage() {
             <Link key={order.id} href={`/orders/${order.id}`}
               className="card p-5 flex items-center justify-between hover:border-zinc-600 transition-colors block">
               <div>
-                <p className="font-medium text-white text-sm">Order #{order.id.slice(0, 8).toUpperCase()}</p>
+                <p className="font-medium text-white text-sm">Order {formatOrderId(order.id)}</p>
                 <p className="text-sm text-zinc-400 mt-0.5 line-clamp-1">{order.description}</p>
                 <p className="text-xs text-zinc-600 mt-1">
                   {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}

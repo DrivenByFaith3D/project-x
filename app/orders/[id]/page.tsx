@@ -4,13 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-zinc-800 text-zinc-300',
-  in_progress: 'bg-zinc-700 text-white',
-  completed: 'bg-white text-black',
-  shipped: 'bg-zinc-300 text-black',
-}
+import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -38,7 +32,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <p className="text-sm text-zinc-500">Order</p>
-          <h1 className="text-2xl font-bold text-white">#{order.id.slice(0, 8).toUpperCase()}</h1>
+          <h1 className="text-2xl font-bold text-white">{formatOrderId(order.id)}</h1>
           <p className="text-sm text-zinc-500 mt-1">
             Created {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>

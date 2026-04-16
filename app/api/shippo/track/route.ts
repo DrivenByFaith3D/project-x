@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { getTrackingStatus } from '@/lib/shippo'
+import { requireAuth } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { error } = await requireAuth()
+  if (error) return error
 
   const carrier = req.nextUrl.searchParams.get('carrier')
   const trackingNumber = req.nextUrl.searchParams.get('tracking_number')

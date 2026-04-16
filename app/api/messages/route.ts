@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, newMessageEmailHtml } from '@/lib/brevo'
+import { requireAuth } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { session, error } = await requireAuth()
+  if (error) return error
 
   const orderId = req.nextUrl.searchParams.get('orderId')
   if (!orderId) return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
@@ -36,8 +35,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { session, error } = await requireAuth()
+  if (error) return error
 
   const { orderId, content, fileUrl } = await req.json()
   if (!orderId || !content?.trim()) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
