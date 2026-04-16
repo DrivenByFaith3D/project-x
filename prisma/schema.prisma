@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -24,12 +24,16 @@ model Order {
   userId         String
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   status         String   @default("pending")
+  orderType      String?
+  orderNumber    String?
   description    String
   trackingNumber String?
   carrier        String?
   trackingStatus String?
   trackingUrl    String?
   createdAt      DateTime @default(now())
+  archivedAt     DateTime?
+  deletedAt      DateTime?
 
   messages Message[]
   files    FileUpload[]

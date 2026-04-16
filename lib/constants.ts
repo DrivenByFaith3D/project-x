@@ -5,6 +5,7 @@ export const STATUS_STYLES: Record<string, string> = {
   shipped: 'bg-zinc-300 text-black',
 }
 
-export const formatOrderId = (id: string) => `#${id.slice(0, 8).toUpperCase()}`
+export const formatOrderId = (order: { id: string; orderNumber?: string | null }) =>
+  order.orderNumber ?? `#${order.id.slice(0, 8).toUpperCase()}`
 
 export const ALLOWED_FILE_EXTENSIONS = ['stl', 'png', 'jpg', 'jpeg', 'gif', 'webp']

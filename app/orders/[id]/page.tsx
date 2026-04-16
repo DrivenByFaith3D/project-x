@@ -32,7 +32,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <p className="text-sm text-zinc-500">Order</p>
-          <h1 className="text-2xl font-bold text-white">{formatOrderId(order.id)}</h1>
+          <h1 className="text-2xl font-bold text-white">{formatOrderId(order)}</h1>
           <p className="text-sm text-zinc-500 mt-1">
             Created {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>

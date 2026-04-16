@@ -40,7 +40,7 @@ export default async function OrdersPage() {
             <Link key={order.id} href={`/orders/${order.id}`}
               className="card p-5 flex items-center justify-between hover:border-zinc-600 transition-colors block">
               <div>
-                <p className="font-medium text-white text-sm">Order {formatOrderId(order.id)}</p>
+                <p className="font-medium text-white text-sm">Order {formatOrderId(order)}</p>
                 <p className="text-sm text-zinc-400 mt-0.5 line-clamp-1">{order.description}</p>
                 <p className="text-xs text-zinc-600 mt-1">
                   {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}

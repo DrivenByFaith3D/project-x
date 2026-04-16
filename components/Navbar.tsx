@@ -21,7 +21,7 @@ export default async function Navbar() {
             <Link href="/listings" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
               Listings
             </Link>
-            {session && (
+            {session && !isAdmin && (
               <Link href="/orders" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
                 My Orders
               </Link>

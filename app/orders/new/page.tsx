@@ -70,7 +70,7 @@ export default function NewOrderPage() {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: `[${orderType?.toUpperCase()}] ${description}` }),
+      body: JSON.stringify({ description, orderType }),
     })
 
     const data = await res.json()
