@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
@@ -29,6 +30,9 @@ interface Rate {
 }
 
 function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: () => void; onShipped: () => void }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const [form, setForm] = useState({
     fromName: '', fromStreet: '', fromCity: '', fromState: '', fromZip: '', fromCountry: 'US',
     toName: '', toStreet: '', toCity: '', toState: '', toZip: '', toCountry: 'US',
@@ -88,7 +92,7 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
     </div>
   )
 
-  return (
+  const modal = (
     <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center px-4 py-12">
         <div className="card p-8 w-full max-w-lg">
@@ -205,10 +209,10 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
         </div>
       </div>
     </div>
-        )}
-      </div>
-    </div>
   )
+
+  if (!mounted) return null
+  return createPortal(modal, document.body)
 }
 
 function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onAction: () => void }) {
