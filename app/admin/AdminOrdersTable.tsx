@@ -150,16 +150,17 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
                   {dimField('Length (in)', 'length', { min: '0.1', step: '0.1' })}
                   {dimField('Width (in)', 'width', { min: '0.1', step: '0.1' })}
                   {dimField('Height (in)', 'height', { min: '0.1', step: '0.1' })}
-                  <div className="col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-1">Weight</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <input className="input w-full pr-8" value={dims.weightLb} onChange={setDim('weightLb')} type="number" min="0" step="1" required />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">lb</span>
+                    <div className="flex rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 focus-within:border-zinc-500">
+                      <div className="relative flex-1">
+                        <input className="w-full bg-transparent px-3 py-2 text-sm text-white focus:outline-none" value={dims.weightLb} onChange={setDim('weightLb')} type="number" min="0" step="1" placeholder="0" required />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-500 pointer-events-none">lb</span>
                       </div>
-                      <div className="relative">
-                        <input className="input w-full pr-8" value={dims.weightOz} onChange={setDim('weightOz')} type="number" min="0" max="15" step="1" required />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">oz</span>
+                      <div className="w-px bg-zinc-700" />
+                      <div className="relative flex-1">
+                        <input className="w-full bg-transparent px-3 py-2 text-sm text-white focus:outline-none" value={dims.weightOz} onChange={setDim('weightOz')} type="number" min="0" max="15" step="1" placeholder="0" required />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-500 pointer-events-none">oz</span>
                       </div>
                     </div>
                   </div>
