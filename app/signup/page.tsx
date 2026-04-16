@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import PasswordInput from '@/components/PasswordInput'
-
+import AddressAutocomplete from '@/components/AddressAutocomplete'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -14,44 +14,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [address, setAddress] = useState('')
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  function handleAddressChange(value: string) {
-    setAddress(value)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (value.length < 3) { setSuggestions([]); setShowSuggestions(false); return }
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/address-search?q=${encodeURIComponent(value)}`)
-        const data = await res.json()
-        setSuggestions(data)
-        setShowSuggestions(data.length > 0)
-      } catch {
-        setSuggestions([])
-      }
-    }, 350)
-  }
-
-  function selectSuggestion(s: string) {
-    setAddress(s)
-    setSuggestions([])
-    setShowSuggestions(false)
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -101,36 +65,12 @@ export default function SignupPage() {
             <PasswordInput value={password} onChange={setPassword} placeholder="At least 6 characters" minLength={6} required />
           </div>
 
-          {/* Address with autocomplete */}
-          <div ref={wrapperRef} className="relative">
+          <div>
             <label className="block text-sm font-medium text-zinc-300 mb-1">
               Shipping Address
               <span className="ml-2 text-xs font-normal text-zinc-500">(optional)</span>
             </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => handleAddressChange(e.target.value)}
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              className="input"
-              placeholder="Start typing your address…"
-              autoComplete="off"
-            />
-            {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden shadow-xl">
-                {suggestions.map((s, i) => (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      onClick={() => selectSuggestion(s)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
-                    >
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <AddressAutocomplete value={address} onChange={setAddress} />
             <p className="mt-1.5 text-xs text-zinc-500">
               Used to ship your completed prints directly to you.
             </p>
