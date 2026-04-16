@@ -8,23 +8,33 @@ interface ChatMessage {
   senderRole: string
 }
 
-export default function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolean }) {
+interface Props {
+  message: ChatMessage
+  isOwn: boolean
+  groupWithPrev?: boolean
+}
+
+export default function MessageBubble({ message, isOwn, groupWithPrev }: Props) {
   const isAdminSender = message.senderRole === 'admin'
   const senderLabel = isAdminSender ? 'DrivenByFaith3D' : message.senderEmail?.split('@')[0] || 'You'
   const time = new Date(message.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-      <div className="flex items-center gap-2 mb-1">
-        <span className={`text-xs font-medium ${isAdminSender ? 'text-zinc-300' : 'text-zinc-500'}`}>
-          {senderLabel}
-        </span>
-        <span className="text-xs text-zinc-600">{time}</span>
-      </div>
-      <div className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-        isOwn ? 'bg-white text-black rounded-br-sm'
-        : isAdminSender ? 'bg-zinc-700 text-white rounded-bl-sm'
-        : 'bg-zinc-800 text-white rounded-bl-sm'
+    <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} ${groupWithPrev ? 'mt-0.5' : 'mt-3'}`}>
+      {!groupWithPrev && (
+        <div className={`flex items-center gap-2 mb-1 ${isOwn ? 'flex-row-reverse' : ''}`}>
+          <span className={`text-xs font-medium ${isAdminSender ? 'text-zinc-300' : 'text-zinc-500'}`}>
+            {senderLabel}
+          </span>
+          <span className="text-xs text-zinc-600">{time}</span>
+        </div>
+      )}
+      <div className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2.5 text-sm leading-relaxed transition-all ${
+        isOwn
+          ? `bg-white text-black ${groupWithPrev ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-br-md'}`
+          : isAdminSender
+          ? `bg-zinc-700 text-white ${groupWithPrev ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-md'}`
+          : `bg-zinc-800 text-white ${groupWithPrev ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-md'}`
       }`}>
         {message.content}
         {message.fileUrl && (
@@ -38,6 +48,9 @@ export default function MessageBubble({ message, isOwn }: { message: ChatMessage
           </a>
         )}
       </div>
+      {groupWithPrev && (
+        <span className="text-xs text-zinc-700 mt-0.5 px-1">{time}</span>
+      )}
     </div>
   )
 }

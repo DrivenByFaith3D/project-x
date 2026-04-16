@@ -28,14 +28,37 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
   const [sending, setSending] = useState(false)
   const [showUploader, setShowUploader] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const latestIdRef = useRef<string | null>(initialMessages.at(-1)?.id ?? null)
+  const isUserScrollingRef = useRef(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
+  function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+    bottomRef.current?.scrollIntoView({ behavior, block: 'end' })
+  }
 
-  // Poll for new messages every 3 seconds
+  // Only scroll if user hasn't scrolled up
+  function maybeScrollToBottom() {
+    const el = scrollContainerRef.current
+    if (!el) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+    if (nearBottom || !isUserScrollingRef.current) scrollToBottom()
+  }
+
+  useEffect(() => {
+    scrollToBottom('instant')
+  }, [])
+
   const poll = useCallback(async () => {
     const res = await fetch(`/api/messages?orderId=${orderId}`)
     if (!res.ok) return
     const data: ChatMessage[] = await res.json()
-    setMessages(data)
+    // Only update if there are new messages to avoid re-render flicker
+    const newLatest = data.at(-1)?.id ?? null
+    if (newLatest !== latestIdRef.current) {
+      latestIdRef.current = newLatest
+      setMessages(data)
+      setTimeout(maybeScrollToBottom, 50)
+    }
   }, [orderId])
 
   useEffect(() => {
@@ -45,16 +68,31 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
-    if (!content.trim() || sending) return
+    const trimmed = content.trim()
+    if (!trimmed || sending) return
     setSending(true)
+    setContent('')
+
+    // Optimistic message
+    const optimistic: ChatMessage = {
+      id: `optimistic-${Date.now()}`,
+      orderId,
+      senderId: currentUserId,
+      content: trimmed,
+      fileUrl: null,
+      createdAt: new Date().toISOString(),
+      senderEmail: '',
+      senderRole: isAdmin ? 'admin' : 'user',
+    }
+    setMessages((prev) => [...prev, optimistic])
+    setTimeout(() => scrollToBottom(), 30)
 
     await fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, content: content.trim() }),
+      body: JSON.stringify({ orderId, content: trimmed }),
     })
 
-    setContent('')
     await poll()
     setSending(false)
   }
@@ -69,7 +107,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
   return (
     <div className="card flex flex-col" style={{ height: '600px' }}>
       <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-        <h2 className="font-semibold text-white">Order Chat</h2>
+        <h2 className="font-semibold text-white">Chat</h2>
         <button onClick={() => setShowUploader((v) => !v)}
           className="text-sm text-zinc-400 hover:text-white font-medium flex items-center gap-1 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,23 +124,45 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <div
+        ref={scrollContainerRef}
+        onScroll={() => {
+          const el = scrollContainerRef.current
+          if (!el) return
+          isUserScrollingRef.current = el.scrollHeight - el.scrollTop - el.clientHeight > 80
+        }}
+        className="flex-1 overflow-y-auto px-5 py-4 space-y-1"
+      >
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-zinc-600 text-sm">
             No messages yet. Start the conversation!
           </div>
         )}
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} isOwn={msg.senderId === currentUserId} />
-        ))}
+        {messages.map((msg, i) => {
+          const prev = messages[i - 1]
+          const groupWithPrev = prev && prev.senderId === msg.senderId
+          return (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              isOwn={msg.senderId === currentUserId}
+              groupWithPrev={groupWithPrev}
+            />
+          )
+        })}
         <div ref={bottomRef} />
       </div>
 
       <form onSubmit={sendMessage} className="px-5 py-4 border-t border-zinc-800">
         <div className="flex gap-3 items-end">
-          <textarea value={content} onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown} className="input resize-none flex-1" rows={2}
-            placeholder="Type a message… (Enter to send, Shift+Enter for new line)" />
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="input resize-none flex-1"
+            rows={2}
+            placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+          />
           <button type="submit" disabled={sending || !content.trim()} className="btn-primary shrink-0 h-10 px-5">
             {sending ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
