@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import ProductCard from '@/components/ProductCard'
 import type { Product } from '@/types'
@@ -14,30 +15,35 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-brand-900 via-brand-700 to-brand-500 text-white">
+      <section className="bg-black border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Custom 3D Printing Services
-            </h1>
-            <p className="text-brand-100 text-lg mb-10 leading-relaxed">
-              From rapid prototypes to production parts — we bring your designs to life with
-              precision and speed. Upload your STL files and get started today.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/orders/new" className="bg-white text-brand-700 hover:bg-brand-50 font-semibold px-8 py-3 rounded-lg transition-colors">
-                Start Custom Order
-              </Link>
-              <Link href="/listings" className="border border-white text-white hover:bg-white/10 font-semibold px-8 py-3 rounded-lg transition-colors">
-                Browse Products
-              </Link>
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
+                Custom 3D Printing Services
+              </h1>
+              <p className="text-zinc-400 text-lg mb-10 leading-relaxed">
+                From rapid prototypes to production parts — we bring your designs to life with
+                precision and speed. Upload your STL files and get started today.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/orders/new" className="btn-primary px-8 py-3">
+                  Start Custom Order
+                </Link>
+                <Link href="/listings" className="btn-secondary px-8 py-3">
+                  Browse Products
+                </Link>
+              </div>
+            </div>
+            <div className="shrink-0">
+              <Image src="/logo.png" alt="DrivenByFaith3D" width={220} height={220} className="object-contain opacity-90" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -45,10 +51,10 @@ export default async function HomePage() {
               { icon: '🎯', title: 'High Precision', desc: 'Layer resolution as fine as 0.05mm.' },
               { icon: '📦', title: 'Tracked Shipping', desc: 'Real-time shipment tracking on every order.' },
             ].map((f) => (
-              <div key={f.title} className="text-center p-6">
+              <div key={f.title} className="text-center p-6 rounded-xl border border-zinc-800 bg-zinc-900">
                 <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-                <p className="text-gray-500 text-sm">{f.desc}</p>
+                <h3 className="font-semibold text-lg mb-2 text-white">{f.title}</h3>
+                <p className="text-zinc-400 text-sm">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -57,11 +63,11 @@ export default async function HomePage() {
 
       {/* Featured Products */}
       {products && products.length > 0 && (
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-black border-b border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-2xl font-bold">Featured Products</h2>
-              <Link href="/listings" className="text-brand-600 hover:text-brand-700 text-sm font-medium">
+              <h2 className="text-2xl font-bold text-white">Featured Products</h2>
+              <Link href="/listings" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
                 View all →
               </Link>
             </div>
@@ -75,11 +81,12 @@ export default async function HomePage() {
       )}
 
       {/* CTA */}
-      <section className="py-20 bg-brand-700 text-white text-center">
+      <section className="py-20 bg-zinc-900 text-center border-t border-zinc-800">
         <div className="max-w-xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-4">Ready to print your idea?</h2>
-          <p className="text-brand-100 mb-8">Upload your file and get a quote within 24 hours.</p>
-          <Link href="/orders/new" className="bg-white text-brand-700 hover:bg-brand-50 font-semibold px-8 py-3 rounded-lg transition-colors">
+          <Image src="/logo.png" alt="DrivenByFaith3D" width={80} height={80} className="mx-auto mb-6 object-contain opacity-80" />
+          <h2 className="text-3xl font-bold mb-4 text-white">Ready to print your idea?</h2>
+          <p className="text-zinc-400 mb-8">Upload your file and get a quote within 24 hours.</p>
+          <Link href="/orders/new" className="btn-primary px-8 py-3">
             Create Custom Order
           </Link>
         </div>

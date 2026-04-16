@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
@@ -25,11 +26,7 @@ export default function SignupPage() {
       options: { emailRedirectTo: `${window.location.origin}/orders` },
     })
 
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
+    if (error) { setError(error.message); setLoading(false); return }
 
     router.push('/orders')
     router.refresh()
@@ -39,39 +36,25 @@ export default function SignupPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="card p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Create account</h1>
-          <p className="text-gray-500 mt-1 text-sm">Start printing your ideas today</p>
+          <Image src="/logo.png" alt="DrivenByFaith3D" width={64} height={64} className="mx-auto mb-4 object-contain" />
+          <h1 className="text-2xl font-bold text-white">Create account</h1>
+          <p className="text-zinc-400 mt-1 text-sm">Start printing your ideas today</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input"
-              placeholder="you@example.com"
-              required
-            />
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              className="input" placeholder="you@example.com" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input"
-              placeholder="At least 6 characters"
-              minLength={6}
-              required
-            />
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+              className="input" placeholder="At least 6 characters" minLength={6} required />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
-            </p>
+            <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>
           )}
 
           <button type="submit" disabled={loading} className="btn-primary w-full">
@@ -79,11 +62,9 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-zinc-500 mt-6">
           Already have an account?{' '}
-          <Link href="/login" className="text-brand-600 font-medium hover:underline">
-            Sign in
-          </Link>
+          <Link href="/login" className="text-white font-medium hover:underline">Sign in</Link>
         </p>
       </div>
     </div>

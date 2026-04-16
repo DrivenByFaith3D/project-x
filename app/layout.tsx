@@ -3,18 +3,18 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
-  title: '3D Print Shop',
+  title: 'DrivenByFaith3D',
   description: 'Professional custom 3D printing services',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col bg-black text-white">
         <Navbar />
         <main className="flex-1">{children}</main>
-        <footer className="bg-gray-900 text-gray-400 text-sm text-center py-6 mt-auto">
-          © {new Date().getFullYear()} 3D Print Shop. All rights reserved.
+        <footer className="bg-zinc-950 border-t border-zinc-800 text-zinc-500 text-sm text-center py-6 mt-auto">
+          © {new Date().getFullYear()} DrivenByFaith3D. All rights reserved.
         </footer>
       </body>
     </html>

@@ -19,7 +19,7 @@ export default function NavbarClient({ user }: { user: User | null }) {
     <div className="flex items-center gap-3">
       {user ? (
         <>
-          <span className="text-sm text-gray-500 hidden sm:block truncate max-w-[160px]">
+          <span className="text-sm text-zinc-500 hidden sm:block truncate max-w-[160px]">
             {user.email}
           </span>
           <button onClick={handleSignOut} className="btn-secondary text-sm">
