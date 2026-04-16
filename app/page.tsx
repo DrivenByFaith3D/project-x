@@ -12,7 +12,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-zinc-950 border-b border-zinc-800/60 overflow-hidden">
+      <section className="relative bg-zinc-900 border-b border-zinc-700/60 overflow-hidden">
         {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
@@ -49,7 +49,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-black border-b border-zinc-800/60">
+      <section className="py-16 bg-zinc-950 border-b border-zinc-700/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
@@ -95,7 +95,7 @@ export default async function HomePage() {
 
       {/* Featured Products */}
       {products.length > 0 && (
-        <section className="py-20 bg-zinc-950 border-b border-zinc-800/60">
+        <section className="py-20 bg-zinc-900 border-b border-zinc-700/60">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
@@ -116,7 +116,7 @@ export default async function HomePage() {
       )}
 
       {/* CTA */}
-      <section className="relative py-24 bg-black text-center overflow-hidden">
+      <section className="relative py-24 bg-zinc-950 text-center overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-white/5 rounded-full blur-3xl" />
         </div>
