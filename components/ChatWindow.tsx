@@ -66,6 +66,23 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
     return () => clearInterval(interval)
   }, [poll])
 
+  async function editMessage(messageId: string, newContent: string) {
+    await fetch('/api/messages', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messageId, content: newContent }),
+    })
+    setMessages((prev) =>
+      prev.map((m) => m.id === messageId ? { ...m, content: newContent } : m)
+    )
+  }
+
+  async function deleteMessage(messageId: string) {
+    if (!confirm('Delete this message?')) return
+    await fetch(`/api/messages?messageId=${messageId}`, { method: 'DELETE' })
+    setMessages((prev) => prev.filter((m) => m.id !== messageId))
+  }
+
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = content.trim()
@@ -147,6 +164,8 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
               message={msg}
               isOwn={msg.senderId === currentUserId}
               groupWithPrev={groupWithPrev}
+              onEdit={editMessage}
+              onDelete={deleteMessage}
             />
           )
         })}

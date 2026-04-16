@@ -81,3 +81,38 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json(message)
 }
+
+export async function PATCH(req: NextRequest) {
+  const { session, error } = await requireAuth()
+  if (error) return error
+
+  const { messageId, content } = await req.json()
+  if (!messageId || !content?.trim()) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+
+  const message = await prisma.message.findUnique({ where: { id: messageId } })
+  if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (message.senderId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const updated = await prisma.message.update({
+    where: { id: messageId },
+    data: { content: content.trim() },
+  })
+
+  return NextResponse.json(updated)
+}
+
+export async function DELETE(req: NextRequest) {
+  const { session, error } = await requireAuth()
+  if (error) return error
+
+  const messageId = req.nextUrl.searchParams.get('messageId')
+  if (!messageId) return NextResponse.json({ error: 'Missing messageId' }, { status: 400 })
+
+  const message = await prisma.message.findUnique({ where: { id: messageId } })
+  if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (message.senderId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  await prisma.message.delete({ where: { id: messageId } })
+
+  return NextResponse.json({ ok: true })
+}
