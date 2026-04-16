@@ -5,6 +5,7 @@ export const STATUS_STYLES: Record<string, string> = {
   in_transit:       'bg-orange-900/60 text-orange-300',
   out_for_delivery: 'bg-purple-900/60 text-purple-300',
   delivered:        'bg-green-900/60 text-green-300',
+  cancelled:        'bg-red-900/60 text-red-300',
 }
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -14,6 +15,7 @@ export const STATUS_LABELS: Record<string, string> = {
   in_transit:       'In Transit',
   out_for_delivery: 'Shipped',
   delivered:        'Delivered',
+  cancelled:        'Cancelled',
 }
 
 // Maps Shippo tracking statuses → our order statuses

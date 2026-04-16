@@ -57,6 +57,11 @@ export async function POST(req: NextRequest) {
     data: { orderId, senderId: session.user.id, content: content.trim(), fileUrl: fileUrl || null },
   })
 
+  // Auto-advance to in_progress when admin manually replies to a pending order
+  if (isAdmin && order.status === 'pending') {
+    await prisma.order.update({ where: { id: orderId }, data: { status: 'in_progress' } })
+  }
+
   // Email notification (non-blocking)
   try {
     const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'

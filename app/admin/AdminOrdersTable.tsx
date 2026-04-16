@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
-type OrderStatus = 'pending' | 'in_progress' | 'label_created' | 'in_transit' | 'out_for_delivery' | 'delivered'
-const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered']
+type OrderStatus = 'pending' | 'in_progress' | 'label_created' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled'
+const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled']
 
 interface Order {
   id: string
