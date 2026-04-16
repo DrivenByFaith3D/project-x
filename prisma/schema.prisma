@@ -37,6 +37,7 @@ model Order {
   carrier        String?
   trackingStatus String?
   trackingUrl    String?
+  labelUrl       String?
   createdAt      DateTime @default(now())
   archivedAt     DateTime?
   deletedAt      DateTime?

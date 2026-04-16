@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
-import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
+import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -37,9 +37,20 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             Created {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <span className={`self-start sm:self-auto text-sm font-medium px-3 py-1.5 rounded-full capitalize ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
-          {order.status.replace('_', ' ')}
-        </span>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          {isAdmin && order.labelUrl && (
+            <a href={order.labelUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Label
+            </a>
+          )}
+          <span className={`text-sm font-medium px-3 py-1.5 rounded-full ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
+            {STATUS_LABELS[order.status] ?? order.status.replace(/_/g, ' ')}
+          </span>
+        </div>
       </div>
 
       <div className="card p-5 mb-6">
@@ -47,7 +58,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <p className="text-zinc-200">{order.description}</p>
       </div>
 
-      {order.status === 'shipped' && order.trackingNumber && (
+      {['label_created', 'in_transit', 'out_for_delivery', 'delivered'].includes(order.status) && order.trackingNumber && (
         <div className="mb-6">
           <ShippingStatus order={order} />
         </div>

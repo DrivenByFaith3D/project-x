@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         carrier: carrier?.toLowerCase() || 'usps',
         trackingUrl: transaction.tracking_url_provider,
         trackingStatus: 'label_created',
+        labelUrl: transaction.label_url,
       },
     })
 
