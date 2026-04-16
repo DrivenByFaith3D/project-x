@@ -82,16 +82,25 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
         )}
 
         {editing ? (
-          <div className="flex flex-col gap-1.5 max-w-xs sm:max-w-md lg:max-w-lg">
+          <div className="flex flex-col gap-1.5 w-full max-w-xs sm:max-w-md lg:max-w-lg">
             <textarea
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={(e) => {
+                setEditValue(e.target.value)
+                e.target.style.height = 'auto'
+                e.target.style.height = e.target.scrollHeight + 'px'
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitEdit() }
                 if (e.key === 'Escape') { setEditing(false) }
               }}
-              className="input resize-none text-sm"
-              rows={2}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = 'auto'
+                  el.style.height = el.scrollHeight + 'px'
+                }
+              }}
+              className="input resize-none text-sm w-full"
               autoFocus
             />
             <div className="flex gap-2 justify-end">
