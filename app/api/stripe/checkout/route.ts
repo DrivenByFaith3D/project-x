@@ -4,7 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api'
 import { formatOrderId } from '@/lib/constants'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not set')
+  return new Stripe(process.env.STRIPE_SECRET_KEY)
+}
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth()
@@ -21,6 +24,7 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
+  const stripe = getStripe()
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
