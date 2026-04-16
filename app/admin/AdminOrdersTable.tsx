@@ -44,7 +44,8 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
   const FROM = { name: 'DrivenByFaith3D', street: '82 Fieldstone Dr', city: 'Springfield', state: 'NJ', zip: '07081', country: 'US' }
 
   const [dims, setDims] = useState({ length: '6', width: '4', height: '3', weightLb: '1', weightOz: '0' })
-  const [step, setStep] = useState<'form' | 'rates'>('form')
+  const [step, setStep] = useState<'form' | 'rates' | 'done'>('form')
+  const [labelUrl, setLabelUrl] = useState<string | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
   const [loading, setLoading] = useState(false)
@@ -85,7 +86,12 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Failed to purchase label'); setLoading(false); return }
-    onShipped(); onClose()
+    onShipped()
+    setLabelUrl(data.label_url || null)
+    setStep('done')
+    setLoading(false)
+    // Auto-open label PDF in new tab
+    if (data.label_url) window.open(data.label_url, '_blank')
   }
 
   const dimField = (label: string, key: keyof typeof dims, opts?: { min?: string; step?: string }) => (
@@ -110,14 +116,15 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-white">
-              {step === 'form' ? 'Create Shipping Label' : 'Choose a Carrier'}
+              {step === 'form' ? 'Create Shipping Label' : step === 'rates' ? 'Choose a Carrier' : 'Label Ready'}
             </h1>
             <p className="text-zinc-400 mt-1 text-sm">
-              {step === 'form' ? 'Enter the package dimensions' : 'Select the rate that works best for you'}
+              {step === 'form' ? 'Enter the package dimensions' : step === 'rates' ? 'Select the rate that works best for you' : 'Your label has been purchased'}
             </p>
             <div className="flex items-center justify-center gap-2 mt-4">
               <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'form' ? 'bg-white' : 'bg-zinc-700'}`} />
               <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'rates' ? 'bg-white' : 'bg-zinc-700'}`} />
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'done' ? 'bg-green-400' : 'bg-zinc-700'}`} />
             </div>
           </div>
 
@@ -216,6 +223,31 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
               </button>
               <button type="button" onClick={() => { setStep('form'); setError('') }} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
                 ← Back to details
+              </button>
+            </div>
+          )}
+
+          {step === 'done' && (
+            <div className="space-y-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-green-900/50 border border-green-800/50 flex items-center justify-center mx-auto">
+                <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold">Label Created</p>
+                <p className="text-zinc-400 text-sm mt-1">The label PDF should have opened in a new tab.</p>
+              </div>
+              {labelUrl && (
+                <a href={labelUrl} target="_blank" rel="noopener noreferrer" className="btn-primary w-full flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Label
+                </a>
+              )}
+              <button type="button" onClick={onClose} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+                Close
               </button>
             </div>
           )}
