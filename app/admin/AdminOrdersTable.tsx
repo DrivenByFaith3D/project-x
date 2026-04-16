@@ -19,12 +19,24 @@ interface Order {
   userEmail: string
 }
 
+interface Rate {
+  id: string
+  carrier: string
+  service: string
+  amount: string
+  currency: string
+  estimatedDays: number
+}
+
 function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: () => void; onShipped: () => void }) {
   const [form, setForm] = useState({
     fromName: '', fromStreet: '', fromCity: '', fromState: '', fromZip: '', fromCountry: 'US',
     toName: '', toStreet: '', toCity: '', toState: '', toZip: '', toCountry: 'US',
     length: '6', width: '4', height: '3', weight: '1',
   })
+  const [step, setStep] = useState<'form' | 'rates'>('form')
+  const [rates, setRates] = useState<Rate[]>([])
+  const [selectedRate, setSelectedRate] = useState<Rate | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -32,61 +44,181 @@ function ShipModal({ orderId, onClose, onShipped }: { orderId: string; onClose: 
     return (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [field]: e.target.value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function fetchRates(e: React.FormEvent) {
     e.preventDefault()
+    setLoading(true); setError('')
+    const res = await fetch('/api/shippo/rates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    const data = await res.json()
+    if (!res.ok) { setError(data.error || 'Failed to fetch rates'); setLoading(false); return }
+    setRates(data.rates)
+    setSelectedRate(data.rates[0] ?? null)
+    setStep('rates')
+    setLoading(false)
+  }
+
+  async function purchaseLabel() {
+    if (!selectedRate) return
     setLoading(true); setError('')
     const res = await fetch('/api/shippo/create-label', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, ...form }),
+      body: JSON.stringify({ orderId, rateId: selectedRate.id, carrier: selectedRate.carrier }),
     })
     const data = await res.json()
-    if (!res.ok) { setError(data.error || 'Failed'); setLoading(false); return }
+    if (!res.ok) { setError(data.error || 'Failed to purchase label'); setLoading(false); return }
     onShipped(); onClose()
   }
 
-  const inp = 'input text-xs py-1.5'
+  const field = (label: string, key: keyof typeof form, opts?: { type?: string; min?: string; step?: string; colSpan?: boolean }) => (
+    <div className={opts?.colSpan ? 'col-span-2' : ''}>
+      <label className="block text-xs font-medium text-zinc-400 mb-1">{label}</label>
+      <input
+        className="input text-sm py-2 w-full"
+        value={form[key]}
+        onChange={set(key)}
+        type={opts?.type ?? 'text'}
+        min={opts?.min}
+        step={opts?.step}
+        required
+      />
+    </div>
+  )
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-          <h3 className="font-semibold text-white">Create Shipping Label</h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">✕</button>
+          <h3 className="font-semibold text-white text-base">Create Shipping Label</h3>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-xs">
+              <span className={`flex items-center gap-1.5 ${step === 'form' ? 'text-white font-medium' : 'text-zinc-500'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step === 'form' ? 'bg-white text-black' : 'bg-zinc-700 text-zinc-400'}`}>1</span>
+                Details
+              </span>
+              <span className="text-zinc-700">——</span>
+              <span className={`flex items-center gap-1.5 ${step === 'rates' ? 'text-white font-medium' : 'text-zinc-500'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step === 'rates' ? 'bg-white text-black' : 'bg-zinc-700 text-zinc-400'}`}>2</span>
+                Choose Carrier
+              </span>
+            </div>
+            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors text-lg leading-none">✕</button>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-2">From Address</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {(['fromName','fromStreet','fromCity','fromState','fromZip','fromCountry'] as const).map((f) => (
-                <input key={f} placeholder={f.replace('from','')} className={inp} value={form[f]} onChange={set(f)} required />
-              ))}
+
+        {step === 'form' && (
+          <form onSubmit={fetchRates} className="p-6 space-y-6">
+
+            {/* From Address */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">From</span>
+                <div className="flex-1 h-px bg-zinc-800" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {field('Full Name', 'fromName', { colSpan: true })}
+                {field('Street Address', 'fromStreet', { colSpan: true })}
+                {field('City', 'fromCity')}
+                {field('State', 'fromState')}
+                {field('ZIP Code', 'fromZip')}
+                {field('Country', 'fromCountry')}
+              </div>
+            </div>
+
+            {/* To Address */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">To</span>
+                <div className="flex-1 h-px bg-zinc-800" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {field('Full Name', 'toName', { colSpan: true })}
+                {field('Street Address', 'toStreet', { colSpan: true })}
+                {field('City', 'toCity')}
+                {field('State', 'toState')}
+                {field('ZIP Code', 'toZip')}
+                {field('Country', 'toCountry')}
+              </div>
+            </div>
+
+            {/* Parcel */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Package</span>
+                <div className="flex-1 h-px bg-zinc-800" />
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {field('Length (in)', 'length', { type: 'number', min: '0.1', step: '0.1' })}
+                {field('Width (in)', 'width', { type: 'number', min: '0.1', step: '0.1' })}
+                {field('Height (in)', 'height', { type: 'number', min: '0.1', step: '0.1' })}
+                {field('Weight (lb)', 'weight', { type: 'number', min: '0.1', step: '0.1' })}
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
+
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-primary flex-1">
+                {loading ? 'Fetching rates…' : 'Get Shipping Rates →'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === 'rates' && (
+          <div className="p-6 space-y-5">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Available Rates</span>
+                <div className="flex-1 h-px bg-zinc-800" />
+                <span className="text-xs text-zinc-600">{rates.length} option{rates.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="space-y-2">
+                {rates.map((rate, i) => (
+                  <button
+                    key={rate.id}
+                    type="button"
+                    onClick={() => setSelectedRate(rate)}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-lg border text-left transition-all ${
+                      selectedRate?.id === rate.id
+                        ? 'border-zinc-400 bg-zinc-800 text-white'
+                        : 'border-zinc-800 bg-zinc-800/30 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-colors ${
+                        selectedRate?.id === rate.id ? 'border-white bg-white' : 'border-zinc-600'
+                      }`} />
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">{rate.carrier}</span>
+                          {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-900/50 text-green-400 border border-green-800/50 rounded">Cheapest</span>}
+                        </div>
+                        <span className="text-zinc-400 text-xs mt-0.5">{rate.service}{rate.estimatedDays > 0 ? ` · Est. ${rate.estimatedDays} day${rate.estimatedDays !== 1 ? 's' : ''}` : ''}</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-base">${parseFloat(rate.amount).toFixed(2)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={() => { setStep('form'); setError('') }} className="btn-secondary flex-1">
+                ← Back
+              </button>
+              <button type="button" onClick={purchaseLabel} disabled={loading || !selectedRate} className="btn-primary flex-1">
+                {loading ? 'Purchasing…' : 'Buy Label & Mark Shipped'}
+              </button>
             </div>
           </div>
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-2">To Address</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {(['toName','toStreet','toCity','toState','toZip','toCountry'] as const).map((f) => (
-                <input key={f} placeholder={f.replace('to','')} className={inp} value={form[f]} onChange={set(f)} required />
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-300 mb-2">Parcel (in / lb)</h4>
-            <div className="grid grid-cols-4 gap-2">
-              {(['length','width','height','weight'] as const).map((f) => (
-                <input key={f} placeholder={f} className={inp} value={form[f]} onChange={set(f)} type="number" min="0.1" step="0.1" required />
-              ))}
-            </div>
-          </div>
-          {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2">{error}</p>}
-          <div className="flex gap-3">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? 'Creating…' : 'Create & Mark Shipped'}
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </div>
   )
@@ -99,7 +231,6 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
   const [busy, setBusy] = useState(false)
 
   async function updateStatus(newStatus: OrderStatus) {
-    if (newStatus === 'shipped') { setShowShipModal(true); return }
     setBusy(true)
     await fetch('/api/orders/status', {
       method: 'PATCH',
@@ -148,8 +279,17 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
               <select value={status} onChange={(e) => updateStatus(e.target.value as OrderStatus)}
                 disabled={busy}
                 className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
-                {STATUSES.map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                </option>
+              ))}
               </select>
+              <button onClick={() => setShowShipModal(true)} disabled={busy}
+                className="text-xs text-zinc-500 hover:text-blue-400 transition-colors px-1.5 py-1 rounded hover:bg-blue-400/10 disabled:opacity-40"
+                title="Create shipping label">
+                Ship Label
+              </button>
               <button onClick={() => doAction('archive')} disabled={busy}
                 className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40"
                 title="Archive">
