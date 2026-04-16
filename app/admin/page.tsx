@@ -3,15 +3,19 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import AdminOrderRow from './AdminOrderRow'
+import UserRow from './UserRow'
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') redirect('/')
 
-  const orders = await prisma.order.findMany({
-    include: { user: { select: { email: true } } },
-    orderBy: { createdAt: 'desc' },
-  })
+  const [orders, users] = await Promise.all([
+    prisma.order.findMany({
+      include: { user: { select: { email: true } } },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.user.findMany({ orderBy: { createdAt: 'desc' } }),
+  ])
 
   const counts = {
     pending: orders.filter((o) => o.status === 'pending').length,
@@ -60,6 +64,31 @@ export default async function AdminPage() {
               {orders.length === 0 && (
                 <tr><td colSpan={5} className="px-5 py-10 text-center text-zinc-600">No orders yet</td></tr>
               )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {/* Users Table */}
+      <div className="card overflow-hidden mt-10">
+        <div className="px-5 py-4 border-b border-zinc-800">
+          <h2 className="font-semibold text-white">All Users</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
+              <tr>
+                <th className="px-5 py-3 text-left">Name</th>
+                <th className="px-5 py-3 text-left">Email</th>
+                <th className="px-5 py-3 text-left">Role</th>
+                <th className="px-5 py-3 text-left">Password</th>
+                <th className="px-5 py-3 text-left">Joined</th>
+                <th className="px-5 py-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {users.map((user) => (
+                <UserRow key={user.id} user={user} />
+              ))}
             </tbody>
           </table>
         </div>
