@@ -41,10 +41,7 @@ export default function SignupPage() {
     if (value.length < 3) { setSuggestions([]); setShowSuggestions(false); return }
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(value)}&countrycodes=us`,
-          { headers: { 'Accept-Language': 'en' } }
-        )
+        const res = await fetch(`/api/address-search?q=${encodeURIComponent(value)}`)
         const data = await res.json()
         setSuggestions(data)
         setShowSuggestions(data.length > 0)
