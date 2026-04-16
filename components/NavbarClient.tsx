@@ -7,6 +7,7 @@ interface User {
   id: string
   email: string
   role: string
+  name?: string | null
 }
 
 export default function NavbarClient({ user }: { user: User | null }) {
@@ -15,7 +16,7 @@ export default function NavbarClient({ user }: { user: User | null }) {
       {user ? (
         <>
           <span className="text-sm text-zinc-500 hidden sm:block truncate max-w-[160px]">
-            {user.email}
+            {user.name ? user.name.split(' ')[0] : user.email}
           </span>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}

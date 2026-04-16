@@ -8,6 +8,7 @@ import Image from 'next/image'
 
 export default function SignupPage() {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -21,7 +22,7 @@ export default function SignupPage() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, name }),
     })
 
     const data = await res.json()
@@ -43,6 +44,11 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Full Name</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+              className="input" placeholder="First and last name" required />
+          </div>
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
