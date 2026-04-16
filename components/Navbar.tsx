@@ -27,9 +27,17 @@ export default async function Navbar() {
               </Link>
             )}
             {isAdmin && (
-              <Link href="/admin" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
-                Admin
-              </Link>
+              <>
+                <Link href="/admin" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
+                  Admin
+                </Link>
+                <Link href="/admin/orders" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
+                  Orders
+                </Link>
+                <Link href="/admin/users" className="text-zinc-400 hover:text-white text-sm font-medium transition-colors">
+                  Users
+                </Link>
+              </>
             )}
           </div>
 
