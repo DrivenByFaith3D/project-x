@@ -263,7 +263,7 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
   return createPortal(modal, document.body)
 }
 
-function OrderRow({ order, tab, unread, onAction }: { order: Order; tab: string; unread: number; onAction: () => void }) {
+function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order: Order; tab: string; unread: number; selected: boolean; onToggle: () => void; onAction: () => void }) {
   const router = useRouter()
   const [status, setStatus] = useState<OrderStatus>(order.status as OrderStatus)
   const [showShipModal, setShowShipModal] = useState(false)
@@ -316,8 +316,16 @@ function OrderRow({ order, tab, unread, onAction }: { order: Order; tab: string;
 
   return (
     <>
-      <tr className="hover:bg-zinc-800/50 transition-colors">
-        <td className="px-5 py-4">
+      <tr className={`hover:bg-zinc-800/50 transition-colors ${selected ? 'bg-zinc-800/30' : ''}`}>
+        <td className="pl-5 pr-2 py-4">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggle}
+            className="accent-blue-600 cursor-pointer"
+          />
+        </td>
+        <td className="px-3 py-4">
           <div className="flex items-center gap-2">
             <Link href={`/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
               {formatOrderId(order)}
@@ -459,13 +467,14 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('active')
   const [search, setSearch] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status !== 'delivered')
   const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status === 'delivered')
   const archived  = initialOrders.filter(o => !!o.archivedAt && !o.deletedAt)
   const trash     = initialOrders.filter(o => !!o.deletedAt)
 
-  // Count unread across active orders for the tab badge
   const activeUnread = active.filter(o => (unreadMap[o.id] ?? 0) > 0).length
 
   const tabs: { id: Tab; label: string; count: number; unread?: number }[] = [
@@ -489,6 +498,60 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
       })
     : baseRows
 
+  const allSelected = rows.length > 0 && rows.every(o => selected.has(o.id))
+  const someSelected = rows.some(o => selected.has(o.id))
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected(prev => { const next = new Set(prev); rows.forEach(o => next.delete(o.id)); return next })
+    } else {
+      setSelected(prev => { const next = new Set(prev); rows.forEach(o => next.add(o.id)); return next })
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
+  }
+
+  // Clear selection when tab changes
+  function switchTab(t: Tab) {
+    setTab(t)
+    setSelected(new Set())
+  }
+
+  async function bulkAction(action: 'archive' | 'delete' | 'restore') {
+    const ids = Array.from(selected).filter(id => rows.some(o => o.id === id))
+    if (ids.length === 0) return
+    if (action === 'delete' && !confirm(`Move ${ids.length} order${ids.length > 1 ? 's' : ''} to trash?`)) return
+    setBulkBusy(true)
+    await fetch('/api/orders/manage', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderIds: ids, action }),
+    })
+    setSelected(new Set())
+    setBulkBusy(false)
+    router.refresh()
+  }
+
+  const selectedInView = rows.filter(o => selected.has(o.id)).length
+
+  // Determine which bulk actions are available per tab
+  const bulkActions: { label: string; action: 'archive' | 'delete' | 'restore'; className: string }[] =
+    tab === 'active' || tab === 'delivered'
+      ? [
+          { label: 'Archive', action: 'archive', className: 'text-amber-400 hover:bg-amber-400/10' },
+          { label: 'Move to Trash', action: 'delete', className: 'text-red-400 hover:bg-red-400/10' },
+        ]
+      : tab === 'archived'
+      ? [
+          { label: 'Restore', action: 'restore', className: 'text-white hover:bg-zinc-700' },
+          { label: 'Move to Trash', action: 'delete', className: 'text-red-400 hover:bg-red-400/10' },
+        ]
+      : [
+          { label: 'Restore', action: 'restore', className: 'text-white hover:bg-zinc-700' },
+        ]
+
   return (
     <div className="card overflow-hidden">
       {/* Header with tabs and search */}
@@ -497,11 +560,9 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
           {tabs.map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => switchTab(t.id)}
               className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
-                tab === t.id
-                  ? 'bg-zinc-700 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                tab === t.id ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
               {t.label}
@@ -511,9 +572,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                 </span>
               )}
               {t.count > 0 && (t.unread ?? 0) === 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                  tab === t.id ? 'bg-zinc-600 text-zinc-200' : 'bg-zinc-800 text-zinc-500'
-                }`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === t.id ? 'bg-zinc-600 text-zinc-200' : 'bg-zinc-800 text-zinc-500'}`}>
                   {t.count}
                 </span>
               )}
@@ -534,19 +593,44 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
         </div>
       </div>
 
-      {tab === 'trash' && trash.length > 0 && (
+      {/* Bulk action bar */}
+      {someSelected && (
+        <div className="px-5 py-2.5 bg-zinc-800/60 border-b border-zinc-700 flex items-center gap-3">
+          <span className="text-xs text-zinc-300 font-medium">{selectedInView} selected</span>
+          <div className="flex items-center gap-1">
+            {bulkActions.map((a) => (
+              <button
+                key={a.action}
+                onClick={() => bulkAction(a.action)}
+                disabled={bulkBusy}
+                className={`text-xs px-2.5 py-1 rounded transition-colors disabled:opacity-40 ${a.className}`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setSelected(new Set())}
+            className="ml-auto text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {tab === 'trash' && trash.length > 0 && !someSelected && (
         <div className="px-5 py-2.5 bg-red-950/30 border-b border-red-900/40 text-xs text-red-400">
           Orders in trash are permanently deleted after 30 days.
         </div>
       )}
 
-      {tab === 'delivered' && (
+      {tab === 'delivered' && !someSelected && (
         <div className="px-5 py-2.5 bg-green-950/30 border-b border-green-900/40 text-xs text-green-400">
           Orders that have been delivered to the customer.
         </div>
       )}
 
-      {tab === 'archived' && (
+      {tab === 'archived' && !someSelected && (
         <div className="px-5 py-2.5 bg-amber-950/30 border-b border-amber-900/40 text-xs text-amber-400">
           Archived orders are kept permanently and can be restored at any time.
         </div>
@@ -556,7 +640,16 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
         <table className="w-full text-sm">
           <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
             <tr>
-              <th className="px-5 py-3 text-left">Order ID</th>
+              <th className="pl-5 pr-2 py-3">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected }}
+                  onChange={toggleAll}
+                  className="accent-blue-600 cursor-pointer"
+                />
+              </th>
+              <th className="px-3 py-3 text-left">Order ID</th>
               <th className="px-5 py-3 text-left">Customer</th>
               <th className="px-5 py-3 text-left">Status</th>
               <th className="px-5 py-3 text-left">Created</th>
@@ -565,11 +658,19 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {rows.map((order) => (
-              <OrderRow key={order.id} order={order} tab={tab} unread={unreadMap[order.id] ?? 0} onAction={() => router.refresh()} />
+              <OrderRow
+                key={order.id}
+                order={order}
+                tab={tab}
+                unread={unreadMap[order.id] ?? 0}
+                selected={selected.has(order.id)}
+                onToggle={() => toggleOne(order.id)}
+                onAction={() => router.refresh()}
+              />
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-zinc-600">
+                <td colSpan={6} className="px-5 py-10 text-center text-zinc-600">
                   {tab === 'active' ? 'No active orders' : tab === 'delivered' ? 'No delivered orders' : tab === 'archived' ? 'No archived orders' : 'Trash is empty'}
                 </td>
               </tr>

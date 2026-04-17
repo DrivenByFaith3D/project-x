@@ -8,22 +8,25 @@ export async function PATCH(req: NextRequest) {
   if (error) return error
   if (session.user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { orderId, action } = await req.json()
-  if (!orderId || !action) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  const { orderId, orderIds, action } = await req.json()
+
+  // Support both single orderId and bulk orderIds array
+  const ids: string[] = orderIds ?? (orderId ? [orderId] : [])
+  if (ids.length === 0 || !action) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
   if (action === 'archive') {
-    await prisma.order.update({
-      where: { id: orderId },
+    await prisma.order.updateMany({
+      where: { id: { in: ids } },
       data: { archivedAt: new Date(), deletedAt: null },
     })
   } else if (action === 'delete') {
-    await prisma.order.update({
-      where: { id: orderId },
+    await prisma.order.updateMany({
+      where: { id: { in: ids } },
       data: { deletedAt: new Date(), archivedAt: null },
     })
   } else if (action === 'restore') {
-    await prisma.order.update({
-      where: { id: orderId },
+    await prisma.order.updateMany({
+      where: { id: { in: ids } },
       data: { deletedAt: null, archivedAt: null },
     })
   } else {
