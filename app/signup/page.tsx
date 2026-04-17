@@ -12,6 +12,10 @@ export default function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [street, setStreet] = useState('')
+  const [city, setCity] = useState('')
+  const [state, setState] = useState('')
+  const [zip, setZip] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [needsVerification, setNeedsVerification] = useState(false)
@@ -24,7 +28,7 @@ export default function SignupPage() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, street, city, state, zip }),
     })
 
     const data = await res.json()
@@ -84,6 +88,23 @@ export default function SignupPage() {
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-1">Password</label>
             <PasswordInput value={password} onChange={setPassword} placeholder="At least 6 characters" minLength={6} required />
+          </div>
+
+          {/* Optional address */}
+          <div className="border-t border-zinc-800 pt-4">
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Shipping Address <span className="normal-case font-normal text-zinc-600">(optional)</span></p>
+            <div className="space-y-3">
+              <input type="text" value={street} onChange={(e) => setStreet(e.target.value)}
+                className="input" placeholder="Street address" />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="text" value={city} onChange={(e) => setCity(e.target.value)}
+                  className="input" placeholder="City" />
+                <input type="text" value={state} onChange={(e) => setState(e.target.value)}
+                  className="input" placeholder="State" />
+              </div>
+              <input type="text" value={zip} onChange={(e) => setZip(e.target.value)}
+                className="input" placeholder="ZIP code" />
+            </div>
           </div>
 
           {error === 'ACCOUNT_EXISTS' ? (

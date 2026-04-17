@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const { success } = rateLimit(`signup:${ip}`, 5, 60 * 60 * 1000)
   if (!success) return NextResponse.json({ error: 'Too many signups. Try again later.' }, { status: 429 })
 
-  const { email, password, name } = await req.json()
+  const { email, password, name, street, city, state, zip } = await req.json()
 
   if (!email || !password || password.length < 6 || !name) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
       verificationToken,
     },
   })
+
+  if (street && city && state && zip) {
+    await prisma.address.create({
+      data: { userId: user.id, label: 'Home', street, city, state, zip, country: 'US', isDefault: true },
+    })
+  }
 
   if (!isAdmin && verificationToken) {
     try {
