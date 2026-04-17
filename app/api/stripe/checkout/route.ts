@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
+      customer_email: session.user.email,
       mode: 'payment',
       success_url: `${appUrl}/orders/${orderId}/payment-success`,
       cancel_url: `${appUrl}/orders/${orderId}/payment-cancel`,
