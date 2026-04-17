@@ -215,9 +215,47 @@ export default async function HomePage() {
     )
   }
 
-  // Logged-in customer: show dashboard
+  // Logged-in customer: show listings + dashboard
   if (session?.user) {
-    return <CustomerDashboard userId={session.user.id} />
+    const listings = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } })
+
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        {/* Listings */}
+        <div>
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-xs font-semibold tracking-widest text-zinc-500 uppercase mb-1">Shop</p>
+              <h2 className="text-xl font-bold text-white">Listings</h2>
+            </div>
+            <Link href="/listings" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              View all →
+            </Link>
+          </div>
+
+          {listings.length === 0 ? (
+            <div className="card p-10 text-center">
+              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <p className="text-zinc-400 font-medium mb-1">No listings yet</p>
+              <p className="text-zinc-600 text-sm">Check back soon — products will appear here.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {listings.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Dashboard */}
+        <CustomerDashboard userId={session.user.id} />
+      </div>
+    )
   }
 
   // Marketing homepage for unauthenticated visitors
