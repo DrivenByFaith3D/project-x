@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MessageBubble from './MessageBubble'
 import FileUploader from './FileUploader'
 
@@ -37,7 +37,6 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
     bottomRef.current?.scrollIntoView({ behavior, block: 'end' })
   }
 
-  // Only scroll if user hasn't scrolled up
   function maybeScrollToBottom() {
     const el = scrollContainerRef.current
     if (!el) return
@@ -49,23 +48,30 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
     scrollToBottom('instant')
   }, [])
 
-  const poll = useCallback(async () => {
-    const res = await fetch(`/api/messages?orderId=${orderId}`)
-    if (!res.ok) return
-    const data: ChatMessage[] = await res.json()
-    // Only update if there are new messages to avoid re-render flicker
-    const newLatest = data.at(-1)?.id ?? null
-    if (newLatest !== latestIdRef.current) {
-      latestIdRef.current = newLatest
-      setMessages(data)
-      setTimeout(maybeScrollToBottom, 50)
-    }
-  }, [orderId])
-
+  // SSE connection for real-time messages
   useEffect(() => {
-    const interval = setInterval(poll, 3000)
-    return () => clearInterval(interval)
-  }, [poll])
+    const lastId = latestIdRef.current
+    const url = `/api/messages/stream?orderId=${orderId}${lastId ? `&lastId=${lastId}` : ''}`
+    const es = new EventSource(url)
+
+    es.addEventListener('message', (e) => {
+      const msg: ChatMessage = JSON.parse(e.data)
+      // Ignore echoes of our own optimistic messages
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev
+        const next = [...prev.filter((m) => !m.id.startsWith('optimistic-')), msg]
+        latestIdRef.current = msg.id
+        setTimeout(maybeScrollToBottom, 50)
+        return next
+      })
+    })
+
+    es.onerror = () => {
+      // EventSource auto-reconnects; nothing to do here
+    }
+
+    return () => es.close()
+  }, [orderId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function editMessage(messageId: string, newContent: string) {
     await fetch('/api/messages', {
@@ -112,7 +118,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
       body: JSON.stringify({ orderId, content: trimmed }),
     })
 
-    await poll()
+    // SSE will push the real message; just clear the sending state
     setSending(false)
   }
 
@@ -139,7 +145,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
 
       {showUploader && (
         <div className="px-5 py-3 border-b border-zinc-800 bg-zinc-950">
-          <FileUploader orderId={orderId} onUploaded={() => { setShowUploader(false); poll() }} />
+          <FileUploader orderId={orderId} onUploaded={() => setShowUploader(false)} />
         </div>
       )}
 
