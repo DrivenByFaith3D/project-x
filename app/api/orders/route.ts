@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api'
+import { sendEmail, newOrderEmailHtml } from '@/lib/brevo'
+import { formatOrderId } from '@/lib/constants'
 
 const TYPE_PREFIX: Record<string, string> = {
   stl: 'STL',
@@ -42,6 +44,25 @@ export async function POST(req: NextRequest) {
         content: `Thank you for your message! We've received it and will review it shortly. We'll reach out to discuss details, pricing, and timeline. We appreciate your interest! 🙏`,
       },
     })
+
+    // Email admin about the new order
+    try {
+      const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      await sendEmail({
+        to: adminUser.email,
+        subject: `New order: ${formatOrderId(order)}`,
+        htmlContent: newOrderEmailHtml(
+          order.id,
+          formatOrderId(order),
+          type,
+          description.trim(),
+          session.user.email,
+          appUrl
+        ),
+      })
+    } catch (e) {
+      console.error('New order email failed:', e)
+    }
   }
 
   return NextResponse.json(order)

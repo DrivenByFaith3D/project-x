@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
 import PayButton from '@/components/PayButton'
+import AdminNotes from '@/components/AdminNotes'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,7 +17,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { files: true },
+    include: { files: true, quoteHistory: { orderBy: { createdAt: 'asc' } } },
   })
 
   if (!order) notFound()
@@ -65,6 +66,31 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Description</h2>
         <p className="text-zinc-200">{order.description}</p>
       </div>
+
+      {isAdmin && <AdminNotes orderId={id} initialNotes={order.adminNotes ?? null} />}
+
+      {isAdmin && order.quoteHistory.length > 0 && (
+        <div className="card p-5 mb-6">
+          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Quote History</h2>
+          <div className="space-y-2">
+            {order.quoteHistory.map((q, i) => (
+              <div key={q.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <span className={`font-semibold ${i === order.quoteHistory.length - 1 ? 'text-white' : 'text-zinc-500 line-through'}`}>
+                    ${q.amount.toFixed(2)}
+                  </span>
+                  {i === order.quoteHistory.length - 1 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300">current</span>
+                  )}
+                </div>
+                <span className="text-zinc-600 text-xs">
+                  {new Date(q.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!isAdmin && order.quote && order.paymentStatus !== 'paid' && (
         <div className="card p-5 mb-6 border border-yellow-800/50 bg-yellow-950/20">

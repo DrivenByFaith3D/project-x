@@ -51,6 +51,25 @@ function baseTemplate(title: string, body: string, ctaUrl: string, ctaLabel: str
   `
 }
 
+export function newOrderEmailHtml(orderId: string, orderLabel: string, orderType: string, description: string, customerEmail: string, appUrl: string) {
+  const orderUrl = `${appUrl}/orders/${orderId}`
+  const typeLabel = orderType === 'stl' ? 'STL File' : orderType === 'image' ? 'Image Reference' : 'From Scratch'
+  return baseTemplate(
+    `New order received: ${orderLabel}`,
+    `
+      <p style="color: #374151;">A new order has been submitted.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Order</td><td style="padding: 8px 0; color: #111827; font-weight: 600;">${orderLabel}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Type</td><td style="padding: 8px 0; color: #111827;">${typeLabel}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Customer</td><td style="padding: 8px 0; color: #111827;">${customerEmail}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">Description</td><td style="padding: 8px 0; color: #111827;">${description.slice(0, 300)}${description.length > 300 ? '…' : ''}</td></tr>
+      </table>
+    `,
+    orderUrl,
+    'View Order'
+  )
+}
+
 export function newMessageEmailHtml(orderId: string, appUrl: string) {
   const orderUrl = `${appUrl}/orders/${orderId}`
   return baseTemplate(

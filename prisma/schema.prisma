@@ -46,9 +46,11 @@ model Order {
   archivedAt     DateTime?
   deletedAt      DateTime?
 
-  messages   Message[]
-  files      FileUpload[]
-  orderViews OrderView[]
+  adminNotes    String?
+  messages      Message[]
+  files         FileUpload[]
+  orderViews    OrderView[]
+  quoteHistory  QuoteHistory[]
 }
 
 model Message {
@@ -75,6 +77,14 @@ model PasswordResetRequest {
   id        String   @id @default(cuid())
   email     String
   name      String
+  createdAt DateTime @default(now())
+}
+
+model QuoteHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Float
   createdAt DateTime @default(now())
 }
 

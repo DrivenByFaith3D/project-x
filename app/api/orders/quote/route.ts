@@ -13,11 +13,16 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid quote amount' }, { status: 400 })
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
-    data: { quote: Number(quote), paymentStatus: 'unpaid' },
-    include: { user: { select: { email: true, name: true } } },
-  })
+  const [order] = await prisma.$transaction([
+    prisma.order.update({
+      where: { id: orderId },
+      data: { quote: Number(quote), paymentStatus: 'unpaid' },
+      include: { user: { select: { email: true, name: true } } },
+    }),
+    prisma.quoteHistory.create({
+      data: { orderId, amount: Number(quote) },
+    }),
+  ])
 
   // Email customer that their quote is ready
   try {
