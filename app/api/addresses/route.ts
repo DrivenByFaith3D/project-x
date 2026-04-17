@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       label, street, city, state, zip,
       country: country || 'US',
-      isDefault: isDefault ?? false,
+      isDefault: isDefault ?? count === 0,
     },
   })
 

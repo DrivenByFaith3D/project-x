@@ -28,7 +28,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
       user: {
         select: {
           id: true, email: true, name: true,
-          addresses: { where: { isDefault: true }, take: 1 },
+          addresses: { orderBy: { isDefault: 'desc' }, take: 1 },
         },
       },
     },

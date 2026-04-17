@@ -128,6 +128,17 @@ export default function AdminOrderActions({
       {/* Shipping */}
       <div className="card p-5">
         <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Shipping</h2>
+        <div className="mb-3 text-sm">
+          {defaultAddress ? (
+            <div className="bg-zinc-800/50 rounded-lg px-3 py-2.5 text-zinc-300 leading-relaxed">
+              <p>{defaultAddress.street}</p>
+              <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.zip}</p>
+              <p className="text-zinc-500 text-xs mt-0.5">{defaultAddress.country}</p>
+            </div>
+          ) : (
+            <p className="text-zinc-500 text-xs">No address on file for this customer.</p>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           <button
             onClick={() => setShowShipModal(true)}
