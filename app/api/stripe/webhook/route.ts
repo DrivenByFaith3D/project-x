@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, productPurchaseAdminEmailHtml, productPurchaseBuyerEmailHtml } from '@/lib/brevo'
+import { logOrderEvent } from '@/lib/events'
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not set')
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
         data: { paymentStatus: 'paid', status: 'in_progress' },
         select: { userId: true },
       })
+      await logOrderEvent(orderId, 'payment_received', 'Payment received')
       // Save Stripe customer ID for portal access
       if (session.customer && typeof session.customer === 'string') {
         await prisma.user.update({

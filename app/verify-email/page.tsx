@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { sendEmail, welcomeEmailHtml } from '@/lib/brevo'
 
 export default async function VerifyEmailPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const { token } = await searchParams
@@ -18,6 +19,18 @@ export default async function VerifyEmailPage({ searchParams }: { searchParams: 
     where: { id: user.id },
     data: { emailVerified: true, verificationToken: null },
   })
+
+  try {
+    const appUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').trim()
+    await sendEmail({
+      to: user.email,
+      toName: user.name ?? undefined,
+      subject: 'Welcome to DrivenByFaith3D — you\'re verified!',
+      htmlContent: welcomeEmailHtml(appUrl),
+    })
+  } catch (e) {
+    console.error('Welcome email failed:', e)
+  }
 
   return <Result success={true} message="Your email has been verified. You can now sign in." />
 }

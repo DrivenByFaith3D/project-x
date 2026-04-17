@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const { success } = rateLimit(`signup:${ip}`, 5, 60 * 60 * 1000)
   if (!success) return NextResponse.json({ error: 'Too many signups. Try again later.' }, { status: 429 })
 
-  const { email, password, name, addressStreet, addressCity, addressState, addressZip, addressCountry } = await req.json()
+  const { email, password, name } = await req.json()
 
   if (!email || !password || password.length < 6 || !name) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
@@ -33,11 +33,6 @@ export async function POST(req: NextRequest) {
       email, password: hashed, name, role,
       emailVerified: isAdmin ? true : false,
       verificationToken,
-      addressStreet: addressStreet || null,
-      addressCity: addressCity || null,
-      addressState: addressState || null,
-      addressZip: addressZip || null,
-      addressCountry: addressCountry || 'US',
     },
   })
 

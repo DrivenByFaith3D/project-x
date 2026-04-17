@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api'
 import { sendEmail, statusChangeEmailHtml } from '@/lib/brevo'
-import { formatOrderId } from '@/lib/constants'
+import { formatOrderId, STATUS_LABELS } from '@/lib/constants'
+import { logOrderEvent } from '@/lib/events'
 
 const VALID_STATUSES = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled']
 
@@ -31,6 +32,7 @@ export async function PATCH(req: NextRequest) {
 
     const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
     for (const order of orders) {
+      await logOrderEvent(order.id, 'status_changed', `Status changed to ${STATUS_LABELS[status] ?? status}`)
       try {
         const email = statusChangeEmailHtml(order.id, formatOrderId(order), status, appUrl)
         if (email) {
@@ -58,6 +60,7 @@ export async function PATCH(req: NextRequest) {
     data: { status },
     include: { user: { select: { email: true, name: true } } },
   })
+  await logOrderEvent(orderId, 'status_changed', `Status changed to ${STATUS_LABELS[status] ?? status}`)
 
   try {
     const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'

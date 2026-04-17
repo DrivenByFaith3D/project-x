@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api'
 import { sendEmail, quoteReadyEmailHtml } from '@/lib/brevo'
 import { formatOrderId } from '@/lib/constants'
+import { logOrderEvent } from '@/lib/events'
 
 export async function PATCH(req: NextRequest) {
   const { error } = await requireAdmin()
@@ -23,6 +24,7 @@ export async function PATCH(req: NextRequest) {
       data: { orderId, amount: Number(quote) },
     }),
   ])
+  await logOrderEvent(orderId, 'quote_set', `Quote set to $${Number(quote).toFixed(2)}`)
 
   // Email customer that their quote is ready
   try {

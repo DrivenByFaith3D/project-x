@@ -8,6 +8,7 @@ import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 type OrderStatus = 'pending' | 'in_progress' | 'label_created' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled'
 const STATUSES: OrderStatus[] = ['pending', 'in_progress', 'label_created', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled']
+// "completed" was a legacy status — "delivered" is now the final state
 
 interface Order {
   id: string
@@ -21,11 +22,7 @@ interface Order {
   paymentStatus?: string | null
   userEmail: string
   userName?: string
-  userAddressStreet?: string
-  userAddressCity?: string
-  userAddressState?: string
-  userAddressZip?: string
-  userAddressCountry?: string
+  userDefaultAddress?: { street: string; city: string; state: string; zip: string; country: string } | null
 }
 
 interface Rate {
@@ -328,7 +325,7 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
         </td>
         <td className="px-3 py-4">
           <div className="flex items-center gap-2">
-            <Link href={`/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
+            <Link href={`/admin/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
               {formatOrderId(order)}
             </Link>
             {unread > 0 && (
@@ -448,11 +445,11 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
           orderId={order.id}
           toAddress={{
             name: order.userName || '',
-            street: order.userAddressStreet || '',
-            city: order.userAddressCity || '',
-            state: order.userAddressState || '',
-            zip: order.userAddressZip || '',
-            country: order.userAddressCountry || 'US',
+            street: order.userDefaultAddress?.street || '',
+            city: order.userDefaultAddress?.city || '',
+            state: order.userDefaultAddress?.state || '',
+            zip: order.userDefaultAddress?.zip || '',
+            country: order.userDefaultAddress?.country || 'US',
           }}
           onClose={() => setShowShipModal(false)}
           onShipped={() => { setStatus('label_created'); router.refresh() }}
@@ -474,8 +471,8 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
   const [bulkBusy, setBulkBusy] = useState(false)
   const [page, setPage] = useState(1)
 
-  const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status !== 'delivered')
-  const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status === 'delivered')
+  const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && !['delivered', 'completed'].includes(o.status))
+  const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && ['delivered', 'completed'].includes(o.status))
   const archived  = initialOrders.filter(o => !!o.archivedAt && !o.deletedAt)
   const trash     = initialOrders.filter(o => !!o.deletedAt)
 

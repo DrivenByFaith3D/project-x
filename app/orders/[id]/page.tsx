@@ -10,6 +10,8 @@ import AdminNotes from '@/components/AdminNotes'
 import CustomerNotes from '@/components/CustomerNotes'
 import OrderDescription from '@/components/OrderDescription'
 import FilePreview from '@/components/FilePreview'
+import OrderTimeline from '@/components/OrderTimeline'
+import OrderPhotos from '@/components/OrderPhotos'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +23,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { files: true, quoteHistory: { orderBy: { createdAt: 'asc' } } },
+    include: {
+      files: true,
+      quoteHistory: { orderBy: { createdAt: 'asc' } },
+      events: { orderBy: { createdAt: 'asc' } },
+      photos: { orderBy: { createdAt: 'asc' } },
+    },
   })
 
   if (!order) notFound()
@@ -151,6 +158,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
       )}
+
+      {!isAdmin && <OrderPhotos photos={order.photos} />}
+
+      <OrderTimeline events={order.events} />
 
       <ChatWindow
         orderId={id}

@@ -4,6 +4,7 @@ import { purchaseLabel } from '@/lib/shippo'
 import { requireAdmin } from '@/lib/api'
 import { sendEmail, statusChangeEmailHtml } from '@/lib/brevo'
 import { formatOrderId } from '@/lib/constants'
+import { logOrderEvent } from '@/lib/events'
 
 export async function POST(req: NextRequest) {
   const { error } = await requireAdmin()
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
       },
       include: { user: { select: { email: true, name: true } } },
     })
+    await logOrderEvent(orderId, 'label_created', `Shipping label created — ${transaction.tracking_number}`)
 
     // Email customer that their order has shipped
     try {

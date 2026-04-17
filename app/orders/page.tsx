@@ -7,17 +7,28 @@ import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
 
 const PER_PAGE = 10
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const { page: pageParam } = await searchParams
+  const { page: pageParam, q } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1') || 1)
+  const search = q?.trim() ?? ''
+
+  const where = {
+    userId: session.user.id,
+    ...(search ? {
+      OR: [
+        { orderNumber: { contains: search, mode: 'insensitive' as const } },
+        { description: { contains: search, mode: 'insensitive' as const } },
+      ],
+    } : {}),
+  }
 
   const [total, orders] = await Promise.all([
-    prisma.order.count({ where: { userId: session.user.id } }),
+    prisma.order.count({ where }),
     prisma.order.findMany({
-      where: { userId: session.user.id },
+      where,
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * PER_PAGE,
       take: PER_PAGE,
@@ -49,7 +60,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">My Orders</h1>
           <p className="text-zinc-400 text-sm mt-1">Track and manage your custom orders</p>
@@ -57,7 +68,28 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         <Link href="/orders/new" className="btn-primary">+ New Order</Link>
       </div>
 
-      {orders.length === 0 && page === 1 ? (
+      <form method="GET" className="mb-6">
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            name="q"
+            defaultValue={search}
+            placeholder="Search by order number or description…"
+            className="input pl-9 w-full"
+          />
+        </div>
+        {search && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-xs text-zinc-500">Results for <span className="text-zinc-300">&ldquo;{search}&rdquo;</span></span>
+            <Link href="/orders" className="text-xs text-zinc-500 hover:text-white underline transition-colors">Clear</Link>
+          </div>
+        )}
+      </form>
+
+      {orders.length === 0 && page === 1 && !search ? (
         <div className="card p-16 text-center">
           <svg className="w-12 h-12 mx-auto mb-4 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
@@ -66,6 +98,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
           <p className="font-medium text-zinc-400">No orders yet</p>
           <p className="text-sm mt-1 mb-6 text-zinc-500">Create your first custom order to get started.</p>
           <Link href="/orders/new" className="btn-primary">Create Order</Link>
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="card p-12 text-center">
+          <p className="font-medium text-zinc-400">No orders found</p>
+          <p className="text-sm mt-1 text-zinc-500">No orders match &ldquo;{search}&rdquo;.</p>
+          <Link href="/orders" className="text-sm text-zinc-500 hover:text-white underline mt-3 inline-block transition-colors">Clear search</Link>
         </div>
       ) : (
         <>
@@ -119,14 +157,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
               </p>
               <div className="flex items-center gap-2">
                 {page > 1 && (
-                  <Link href={`/orders?page=${page - 1}`}
+                  <Link href={`/orders?page=${page - 1}${search ? `&q=${encodeURIComponent(search)}` : ''}`}
                     className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors">
                     ← Previous
                   </Link>
                 )}
                 <span className="text-xs text-zinc-500">Page {page} of {totalPages}</span>
                 {page < totalPages && (
-                  <Link href={`/orders?page=${page + 1}`}
+                  <Link href={`/orders?page=${page + 1}${search ? `&q=${encodeURIComponent(search)}` : ''}`}
                     className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors">
                     Next →
                   </Link>

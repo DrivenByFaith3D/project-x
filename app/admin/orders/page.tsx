@@ -13,7 +13,15 @@ export default async function AdminOrdersPage() {
   await prisma.order.deleteMany({ where: { deletedAt: { not: null, lte: cutoff } } })
 
   const orders = await prisma.order.findMany({
-    include: { user: { select: { email: true, name: true, addressStreet: true, addressCity: true, addressState: true, addressZip: true, addressCountry: true } } },
+    include: {
+      user: {
+        select: {
+          email: true,
+          name: true,
+          addresses: { where: { isDefault: true }, take: 1 },
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   })
 
@@ -38,16 +46,21 @@ export default async function AdminOrdersPage() {
   )
   const unreadMap = Object.fromEntries(unreadCounts.map(u => [u.orderId, u.count]))
 
-  const tableOrders = orders.map((o) => ({
-    ...o,
-    userEmail: o.user.email,
-    userName: o.user.name ?? '',
-    userAddressStreet: o.user.addressStreet ?? '',
-    userAddressCity: o.user.addressCity ?? '',
-    userAddressState: o.user.addressState ?? '',
-    userAddressZip: o.user.addressZip ?? '',
-    userAddressCountry: o.user.addressCountry ?? 'US',
-  }))
+  const tableOrders = orders.map((o) => {
+    const defaultAddr = o.user.addresses[0] ?? null
+    return {
+      ...o,
+      userEmail: o.user.email,
+      userName: o.user.name ?? '',
+      userDefaultAddress: defaultAddr ? {
+        street: defaultAddr.street,
+        city: defaultAddr.city,
+        state: defaultAddr.state,
+        zip: defaultAddr.zip,
+        country: defaultAddr.country,
+      } : null,
+    }
+  })
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

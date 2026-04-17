@@ -16,7 +16,16 @@ export default async function HomePage() {
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     await prisma.order.deleteMany({ where: { deletedAt: { not: null, lte: cutoff } } })
 
-    const [activeOrders, recentMessages, listingsCount] = await Promise.all([
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+    sixMonthsAgo.setDate(1)
+    sixMonthsAgo.setHours(0, 0, 0, 0)
+
+    const [activeOrders, recentMessages, listingsCount, paidOrders] = await Promise.all([
       prisma.order.findMany({
         where: { archivedAt: null, deletedAt: null },
       }),
@@ -29,13 +38,46 @@ export default async function HomePage() {
         },
       }),
       prisma.product.count(),
+      prisma.order.findMany({
+        where: { paymentStatus: 'paid', deletedAt: null, createdAt: { gte: sixMonthsAgo } },
+        select: { quote: true, createdAt: true },
+      }),
     ])
+
+    const allTimePaid = await prisma.order.aggregate({
+      where: { paymentStatus: 'paid', deletedAt: null },
+      _sum: { quote: true },
+      _count: true,
+    })
+
+    const revenueThisMonth = paidOrders
+      .filter(o => new Date(o.createdAt) >= startOfMonth)
+      .reduce((sum, o) => sum + (o.quote ?? 0), 0)
+    const ordersThisMonth = paidOrders.filter(o => new Date(o.createdAt) >= startOfMonth).length
+    const revenueAllTime = allTimePaid._sum.quote ?? 0
+    const avgOrderValue = allTimePaid._count > 0 ? revenueAllTime / allTimePaid._count : 0
+
+    // Bar chart: orders per month for last 6 months
+    const monthBuckets: { label: string; count: number }[] = []
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date()
+      d.setMonth(d.getMonth() - i)
+      const label = d.toLocaleString('en-US', { month: 'short' })
+      const year = d.getFullYear()
+      const month = d.getMonth()
+      const count = paidOrders.filter(o => {
+        const c = new Date(o.createdAt)
+        return c.getFullYear() === year && c.getMonth() === month
+      }).length
+      monthBuckets.push({ label, count })
+    }
+    const maxBucketCount = Math.max(...monthBuckets.map(b => b.count), 1)
 
     const counts = {
       pending:     activeOrders.filter((o) => o.status === 'pending').length,
       in_progress: activeOrders.filter((o) => o.status === 'in_progress').length,
-      shipped:     activeOrders.filter((o) => o.status === 'shipped').length,
-      completed:   activeOrders.filter((o) => o.status === 'completed').length,
+      in_transit:  activeOrders.filter((o) => ['label_created', 'in_transit', 'out_for_delivery'].includes(o.status)).length,
+      delivered:   activeOrders.filter((o) => ['delivered', 'completed'].includes(o.status)).length,
     }
 
     return (
@@ -50,14 +92,46 @@ export default async function HomePage() {
           {[
             { label: 'Pending',     value: counts.pending,     href: '/admin/orders' },
             { label: 'In Progress', value: counts.in_progress, href: '/admin/orders' },
-            { label: 'Shipped',     value: counts.shipped,     href: '/admin/orders' },
-            { label: 'Completed',   value: counts.completed,   href: '/admin/orders' },
+            { label: 'In Transit',  value: counts.in_transit,  href: '/admin/orders' },
+            { label: 'Delivered',   value: counts.delivered,   href: '/admin/orders' },
           ].map((stat) => (
             <Link key={stat.label} href={stat.href} className="card p-5 hover:border-zinc-600 transition-colors">
               <p className="text-3xl font-bold text-white">{stat.value}</p>
               <p className="text-sm font-medium mt-1 text-zinc-400">{stat.label}</p>
             </Link>
           ))}
+        </div>
+
+        {/* Revenue stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {[
+            { label: 'Revenue This Month', value: `$${revenueThisMonth.toFixed(2)}` },
+            { label: 'Revenue All Time',   value: `$${revenueAllTime.toFixed(2)}` },
+            { label: 'Avg Order Value',    value: avgOrderValue > 0 ? `$${avgOrderValue.toFixed(2)}` : '—' },
+            { label: 'Paid This Month',    value: String(ordersThisMonth) },
+          ].map((stat) => (
+            <div key={stat.label} className="card p-5">
+              <p className="text-xl font-bold text-white">{stat.value}</p>
+              <p className="text-xs font-medium mt-1 text-zinc-400">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Orders chart */}
+        <div className="card p-5 mb-6">
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-4">Paid Orders — Last 6 Months</p>
+          <div className="flex items-end gap-2 h-24">
+            {monthBuckets.map((b) => (
+              <div key={b.label} className="flex-1 flex flex-col items-center gap-1.5">
+                <span className="text-xs text-zinc-500">{b.count > 0 ? b.count : ''}</span>
+                <div
+                  className="w-full rounded-sm bg-zinc-600 hover:bg-zinc-400 transition-colors"
+                  style={{ height: `${Math.max(4, (b.count / maxBucketCount) * 72)}px` }}
+                />
+                <span className="text-[10px] text-zinc-500">{b.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -78,7 +152,7 @@ export default async function HomePage() {
                   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
                 })
                 return (
-                  <Link key={msg.id} href={`/orders/${msg.order.id}`}
+                  <Link key={msg.id} href={`/admin/orders/${msg.order.id}`}
                     className="flex items-start gap-3 px-5 py-3.5 hover:bg-zinc-800/50 transition-colors">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
                       isAdminMsg ? 'bg-white text-black' : 'bg-zinc-700 text-white'

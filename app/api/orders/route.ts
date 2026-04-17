@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/api'
 import { sendEmail, newOrderEmailHtml } from '@/lib/brevo'
 import { formatOrderId } from '@/lib/constants'
 import { rateLimit } from '@/lib/rate-limit'
+import { logOrderEvent } from '@/lib/events'
 
 const TYPE_PREFIX: Record<string, string> = {
   stl: 'STL',
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
       orderNumber,
     },
   })
+  await logOrderEvent(order.id, 'order_created', 'Order submitted')
 
   // Post an automatic welcome message from the admin account
   const adminUser = await prisma.user.findFirst({ where: { role: 'admin' } })
