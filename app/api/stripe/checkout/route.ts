@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
             product_data: {
               name: `3D Print Order ${formatOrderId(order)}`,
               description: order.description.slice(0, 200),
+              images: [`${appUrl}/logo.png`],
             },
             unit_amount: Math.round(order.quote * 100),
           },
