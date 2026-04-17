@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+import { uploadFile } from '@/lib/storage'
 import { requireAuth } from '@/lib/api'
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB
@@ -23,20 +22,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const ext = file.name.split('.').pop()
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', orderId)
+  const { url, name } = await uploadFile(file, orderId)
 
-  await mkdir(uploadDir, { recursive: true })
-  const bytes = await file.arrayBuffer()
-  await writeFile(path.join(uploadDir, filename), Buffer.from(bytes))
-
-  const url = `/uploads/${orderId}/${filename}`
-
-  await prisma.fileUpload.create({ data: { orderId, url, name: file.name } })
+  await prisma.fileUpload.create({ data: { orderId, url, name } })
   await prisma.message.create({
-    data: { orderId, senderId: session.user.id, content: `Uploaded file: ${file.name}`, fileUrl: url },
+    data: { orderId, senderId: session.user.id, content: `Uploaded file: ${name}`, fileUrl: url },
   })
 
-  return NextResponse.json({ url, name: file.name })
+  return NextResponse.json({ url, name })
 }

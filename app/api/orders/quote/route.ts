@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api'
+import { sendEmail, quoteReadyEmailHtml } from '@/lib/brevo'
+import { formatOrderId } from '@/lib/constants'
 
 export async function PATCH(req: NextRequest) {
   const { error } = await requireAdmin()
@@ -14,7 +16,21 @@ export async function PATCH(req: NextRequest) {
   const order = await prisma.order.update({
     where: { id: orderId },
     data: { quote: Number(quote), paymentStatus: 'unpaid' },
+    include: { user: { select: { email: true, name: true } } },
   })
+
+  // Email customer that their quote is ready
+  try {
+    const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    await sendEmail({
+      to: order.user.email,
+      toName: order.user.name ?? undefined,
+      subject: 'Your quote is ready — DrivenByFaith3D',
+      htmlContent: quoteReadyEmailHtml(orderId, formatOrderId(order), Number(quote), appUrl),
+    })
+  } catch (e) {
+    console.error('Quote email failed:', e)
+  }
 
   return NextResponse.json(order)
 }

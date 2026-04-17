@@ -3,6 +3,8 @@ import { getTrackingStatus } from '@/lib/shippo'
 import { requireAuth } from '@/lib/api'
 import { prisma } from '@/lib/prisma'
 import { SHIPPO_STATUS_MAP } from '@/lib/constants'
+import { sendEmail, statusChangeEmailHtml } from '@/lib/brevo'
+import { formatOrderId } from '@/lib/constants'
 
 export async function GET(req: NextRequest) {
   const { error } = await requireAuth()
@@ -23,10 +25,29 @@ export async function GET(req: NextRequest) {
     // Auto-update order status based on Shippo tracking
     if (orderId && shippoStatus && SHIPPO_STATUS_MAP[shippoStatus]) {
       const newStatus = SHIPPO_STATUS_MAP[shippoStatus]
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: newStatus, trackingStatus: shippoStatus },
-      }).catch(() => {}) // silent fail — don't block tracking response
+      try {
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          select: { status: true, orderNumber: true, id: true, user: { select: { email: true, name: true } } },
+        })
+        // Only update + email if status actually changed
+        if (order && order.status !== newStatus) {
+          await prisma.order.update({
+            where: { id: orderId },
+            data: { status: newStatus, trackingStatus: shippoStatus },
+          })
+          const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+          const email = statusChangeEmailHtml(orderId, formatOrderId(order), newStatus, appUrl)
+          if (email) {
+            await sendEmail({
+              to: order.user.email,
+              toName: order.user.name ?? undefined,
+              subject: email.subject,
+              htmlContent: email.html,
+            }).catch((e) => console.error('Tracking status email failed:', e))
+          }
+        }
+      } catch { /* silent fail — don't block tracking response */ }
     }
 
     return NextResponse.json({
