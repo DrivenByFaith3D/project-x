@@ -1,13 +1,23 @@
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
 
-export default async function ListingsPage() {
+export default async function ListingsPage({ searchParams }: { searchParams: Promise<{ purchase?: string }> }) {
+  const { purchase } = await searchParams
   const products = await prisma.product.findMany({
     orderBy: { createdAt: 'desc' },
   })
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {purchase === 'success' && (
+        <div className="mb-6 flex items-center gap-3 bg-green-950/40 border border-green-800/50 rounded-lg px-4 py-3">
+          <svg className="w-5 h-5 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="text-sm text-green-300">Purchase successful! We'll be in touch about your order soon.</p>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">Product Listings</h1>
         <p className="text-zinc-400 mt-2">Browse our catalog of standard 3D printed products.</p>

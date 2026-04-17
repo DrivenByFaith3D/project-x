@@ -51,6 +51,35 @@ function baseTemplate(title: string, body: string, ctaUrl: string, ctaLabel: str
   `
 }
 
+export function productPurchaseAdminEmailHtml(productName: string, amount: number, buyerEmail: string, appUrl: string) {
+  return baseTemplate(
+    `New product purchase: ${productName}`,
+    `
+      <p style="color: #374151;">A customer has purchased a product from your listings.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Product</td><td style="padding: 8px 0; color: #111827; font-weight: 600;">${productName}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Amount</td><td style="padding: 8px 0; color: #111827; font-weight: 600;">$${amount.toFixed(2)}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Buyer</td><td style="padding: 8px 0; color: #111827;">${buyerEmail}</td></tr>
+      </table>
+    `,
+    `${appUrl}/admin`,
+    'View Dashboard'
+  )
+}
+
+export function passwordResetEmailHtml(resetUrl: string) {
+  return baseTemplate(
+    'Reset your password',
+    `
+      <p style="color: #374151;">We received a request to reset your DrivenByFaith3D password.</p>
+      <p style="color: #374151;">Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+      <p style="color: #6b7280; font-size: 13px; margin-top: 16px;">If you didn't request a password reset, you can safely ignore this email.</p>
+    `,
+    resetUrl,
+    'Reset Password'
+  )
+}
+
 export function newOrderEmailHtml(orderId: string, orderLabel: string, orderType: string, description: string, customerEmail: string, appUrl: string) {
   const orderUrl = `${appUrl}/orders/${orderId}`
   const typeLabel = orderType === 'stl' ? 'STL File' : orderType === 'image' ? 'Image Reference' : 'From Scratch'

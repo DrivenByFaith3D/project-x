@@ -1,4 +1,7 @@
+'use client'
+
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface Product {
   id: string
@@ -9,8 +12,25 @@ interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleBuy() {
+    setLoading(true)
+    const res = await fetch('/api/stripe/product-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: product.id }),
+    })
+    const data = await res.json()
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="card overflow-hidden hover:border-zinc-600 transition-colors">
+    <div className="card overflow-hidden hover:border-zinc-600 transition-colors flex flex-col">
       <div className="aspect-square bg-zinc-800 relative">
         {product.imageUrl ? (
           <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
@@ -23,12 +43,21 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
       </div>
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <h3 className="font-semibold text-white">{product.name}</h3>
         {product.description && (
-          <p className="text-sm text-zinc-400 mt-1 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-zinc-400 mt-1 line-clamp-2 flex-1">{product.description}</p>
         )}
-        <p className="text-white font-bold text-lg mt-2">${product.price.toFixed(2)}</p>
+        <div className="flex items-center justify-between mt-3 gap-3">
+          <p className="text-white font-bold text-lg">${product.price.toFixed(2)}</p>
+          <button
+            onClick={handleBuy}
+            disabled={loading}
+            className="btn-primary text-sm py-1.5 px-4 shrink-0 disabled:opacity-60"
+          >
+            {loading ? 'Loading…' : 'Buy Now'}
+          </button>
+        </div>
       </div>
     </div>
   )

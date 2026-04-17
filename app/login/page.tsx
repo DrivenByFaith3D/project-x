@@ -19,17 +19,9 @@ export default function LoginPage() {
 
   const [showForgot, setShowForgot] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
-  const [resetName, setResetName] = useState('')
   const [resetLoading, setResetLoading] = useState(false)
   const [resetDone, setResetDone] = useState(false)
   const [resetError, setResetError] = useState('')
-  const [copied, setCopied] = useState(false)
-
-  function copyPassword() {
-    navigator.clipboard.writeText('drivenbyfaith3d')
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,11 +48,11 @@ export default function LoginPage() {
     const res = await fetch('/api/password-reset-request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: resetEmail, name: resetName }),
+      body: JSON.stringify({ email: resetEmail }),
     })
 
-    const data = await res.json()
     if (!res.ok) {
+      const data = await res.json()
       setResetError(data.error)
       setResetLoading(false)
       return
@@ -126,33 +118,13 @@ export default function LoginPage() {
           <div className="text-center space-y-4">
             <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-white font-medium">Request sent!</p>
+            <p className="text-white font-medium">Check your email</p>
             <p className="text-sm text-zinc-400">
-              Your password has been reset. Sign in with the temporary password below and you'll be prompted to set a new one.
+              If an account exists for <strong className="text-white">{resetEmail}</strong>, we've sent a password reset link. Check your inbox — it expires in 1 hour.
             </p>
-            <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 mt-2">
-              <span className="font-mono text-white text-base tracking-wide">drivenbyfaith3d</span>
-              <button onClick={copyPassword} className="ml-3 text-xs text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 shrink-0">
-                {copied ? (
-                  <>
-                    <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-green-400">Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copy
-                  </>
-                )}
-              </button>
-            </div>
             <button onClick={() => { setShowForgot(false); setResetDone(false) }}
               className="btn-secondary w-full mt-2">
               Back to sign in
@@ -166,18 +138,13 @@ export default function LoginPage() {
                 <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
                   className="input" placeholder="you@example.com" required />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1">Name on file</label>
-                <input type="text" value={resetName} onChange={(e) => setResetName(e.target.value)}
-                  className="input" placeholder="First and last name" required />
-              </div>
 
               {resetError && (
                 <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{resetError}</p>
               )}
 
               <button type="submit" disabled={resetLoading} className="btn-primary w-full">
-                {resetLoading ? 'Sending…' : 'Send Reset Request'}
+                {resetLoading ? 'Sending…' : 'Send Reset Link'}
               </button>
             </form>
 

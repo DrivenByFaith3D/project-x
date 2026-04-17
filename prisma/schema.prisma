@@ -21,9 +21,10 @@ model User {
   addressCountry     String?  @default("US")
   createdAt          DateTime @default(now())
 
-  orders     Order[]
-  messages   Message[]
-  orderViews OrderView[]
+  orders              Order[]
+  messages            Message[]
+  orderViews          OrderView[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Order {
@@ -78,6 +79,14 @@ model PasswordResetRequest {
   email     String
   name      String
   createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model QuoteHistory {
