@@ -4,6 +4,34 @@ import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import PasswordInput from '@/components/PasswordInput'
+import AddressManager from '@/components/AddressManager'
+
+function BillingPortalButton() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function openPortal() {
+    setLoading(true)
+    setError('')
+    const res = await fetch('/api/stripe/portal', { method: 'POST' })
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error ?? 'Could not open billing portal.')
+      setLoading(false)
+      return
+    }
+    window.location.href = data.url
+  }
+
+  return (
+    <>
+      <button onClick={openPortal} disabled={loading} className="btn-secondary">
+        {loading ? 'Opening…' : 'View Billing Portal'}
+      </button>
+      {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+    </>
+  )
+}
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
@@ -99,6 +127,17 @@ export default function SettingsPage() {
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </form>
+      </div>
+
+      <AddressManager />
+
+      {/* Billing & Invoices */}
+      <div className="card p-6 mb-6">
+        <h2 className="text-lg font-semibold text-white mb-2">Billing &amp; Invoices</h2>
+        <p className="text-sm text-zinc-400 mb-4">
+          View your payment history and download invoices for past orders.
+        </p>
+        <BillingPortalButton />
       </div>
 
       {/* Delete Account */}

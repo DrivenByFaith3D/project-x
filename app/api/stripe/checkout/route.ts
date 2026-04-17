@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
   const { orderId } = await req.json()
   if (!orderId) return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
 
-  const order = await prisma.order.findUnique({ where: { id: orderId } })
+  const [order, user] = await Promise.all([
+    prisma.order.findUnique({ where: { id: orderId } }),
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { stripeCustomerId: true, email: true } }),
+  ])
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   if (order.userId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (!order.quote) return NextResponse.json({ error: 'No quote set for this order' }, { status: 400 })
@@ -42,7 +45,9 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      customer_email: session.user.email,
+      ...(user?.stripeCustomerId
+        ? { customer: user.stripeCustomerId }
+        : { customer_email: session.user.email }),
       mode: 'payment',
       success_url: `${appUrl}/orders/${orderId}/payment-success`,
       cancel_url: `${appUrl}/orders/${orderId}/payment-cancel`,

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
+import CustomerDashboard from '@/components/CustomerDashboard'
 import { STATUS_STYLES, formatOrderId } from '@/lib/constants'
 
 export default async function HomePage() {
@@ -140,7 +141,12 @@ export default async function HomePage() {
     )
   }
 
-  // Regular homepage for non-admin users
+  // Logged-in customer: show dashboard
+  if (session?.user) {
+    return <CustomerDashboard userId={session.user.id} />
+  }
+
+  // Marketing homepage for unauthenticated visitors
   const products = await prisma.product.findMany({ take: 3, orderBy: { createdAt: 'desc' } })
 
   return (

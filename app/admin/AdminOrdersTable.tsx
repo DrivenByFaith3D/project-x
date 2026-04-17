@@ -531,6 +531,22 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
     setPage(1)
   }
 
+  const [bulkStatus, setBulkStatus] = useState<OrderStatus>('in_progress')
+
+  async function bulkStatusUpdate() {
+    const ids = Array.from(selected).filter(id => filteredRows.some(o => o.id === id))
+    if (ids.length === 0) return
+    setBulkBusy(true)
+    await fetch('/api/orders/status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderIds: ids, status: bulkStatus }),
+    })
+    setSelected(new Set())
+    setBulkBusy(false)
+    router.refresh()
+  }
+
   async function bulkAction(action: 'archive' | 'delete' | 'restore') {
     const ids = Array.from(selected).filter(id => rows.some(o => o.id === id))
     if (ids.length === 0) return
@@ -608,9 +624,30 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
 
       {/* Bulk action bar */}
       {someSelected && (
-        <div className="px-5 py-2.5 bg-zinc-800/60 border-b border-zinc-700 flex items-center gap-3">
+        <div className="px-5 py-2.5 bg-zinc-800/60 border-b border-zinc-700 flex items-center gap-3 flex-wrap">
           <span className="text-xs text-zinc-300 font-medium">{selectedInView} selected</span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap">
+            {tab === 'active' && (
+              <div className="flex items-center gap-1 border-r border-zinc-700 pr-2 mr-1">
+                <select
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value as OrderStatus)}
+                  disabled={bulkBusy}
+                  className="text-xs bg-zinc-900 border border-zinc-700 text-white rounded px-1.5 py-1 focus:outline-none disabled:opacity-50"
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={bulkStatusUpdate}
+                  disabled={bulkBusy}
+                  className="text-xs px-2.5 py-1 rounded bg-zinc-700 text-white hover:bg-zinc-600 transition-colors disabled:opacity-40"
+                >
+                  Set Status
+                </button>
+              </div>
+            )}
             {bulkActions.map((a) => (
               <button
                 key={a.action}

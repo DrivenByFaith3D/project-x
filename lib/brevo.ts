@@ -83,6 +83,19 @@ export function productPurchaseAdminEmailHtml(productName: string, amount: numbe
   )
 }
 
+export function verificationEmailHtml(verifyUrl: string) {
+  return baseTemplate(
+    'Verify your email address',
+    `
+      <p style="color: #374151;">Thanks for signing up with DrivenByFaith3D! Please verify your email address to activate your account.</p>
+      <p style="color: #374151;">Click the button below to verify. This link expires in <strong>24 hours</strong>.</p>
+      <p style="color: #6b7280; font-size: 13px; margin-top: 16px;">If you didn't create an account, you can safely ignore this email.</p>
+    `,
+    verifyUrl,
+    'Verify Email'
+  )
+}
+
 export function passwordResetEmailHtml(resetUrl: string) {
   return baseTemplate(
     'Reset your password',

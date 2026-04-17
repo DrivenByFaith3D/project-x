@@ -73,9 +73,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             {orders.map((order) => {
               const unread = unreadMap.get(order.id) ?? 0
               return (
-                <Link key={order.id} href={`/orders/${order.id}`}
-                  className={`card p-5 flex items-center justify-between hover:border-zinc-600 transition-colors block ${unread > 0 ? 'border-blue-800/60' : ''}`}>
-                  <div>
+                <div key={order.id} className={`card p-5 flex items-center justify-between hover:border-zinc-600 transition-colors ${unread > 0 ? 'border-blue-800/60' : ''}`}>
+                  <Link href={`/orders/${order.id}`} className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-white text-sm">Order {formatOrderId(order)}</p>
                       {unread > 0 && (
@@ -88,16 +87,27 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                     <p className="text-xs text-zinc-600 mt-1">
                       {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
-                  </div>
-                  <div className="flex items-center gap-3">
+                  </Link>
+                  <div className="flex items-center gap-3 ml-4 shrink-0">
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
                       {order.status.replace('_', ' ')}
                     </span>
-                    <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    {['delivered', 'completed'].includes(order.status) && (
+                      <Link
+                        href={`/orders/new?type=${order.orderType ?? 'scratch'}&description=${encodeURIComponent(order.description.slice(0, 500))}`}
+                        className="text-xs text-zinc-500 hover:text-white border border-zinc-700 hover:border-zinc-500 px-2 py-1 rounded transition-colors"
+                        title="Reorder"
+                      >
+                        Reorder
+                      </Link>
+                    )}
+                    <Link href={`/orders/${order.id}`}>
+                      <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
-                </Link>
+                </div>
               )
             })}
           </div>

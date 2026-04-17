@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/api'
 import { sendEmail, newOrderEmailHtml } from '@/lib/brevo'
 import { formatOrderId } from '@/lib/constants'
+import { rateLimit } from '@/lib/rate-limit'
 
 const TYPE_PREFIX: Record<string, string> = {
   stl: 'STL',
@@ -13,6 +14,9 @@ const TYPE_PREFIX: Record<string, string> = {
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth()
   if (error) return error
+
+  const { success } = rateLimit(`order:${session.user.id}`, 10, 60 * 60_000)
+  if (!success) return NextResponse.json({ error: 'Too many orders submitted. Try again later.' }, { status: 429 })
 
   const { description, orderType } = await req.json()
   if (!description?.trim()) return NextResponse.json({ error: 'Description required' }, { status: 400 })

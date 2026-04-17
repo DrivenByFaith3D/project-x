@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -6,7 +7,9 @@ import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
 import PayButton from '@/components/PayButton'
 import AdminNotes from '@/components/AdminNotes'
+import CustomerNotes from '@/components/CustomerNotes'
 import OrderDescription from '@/components/OrderDescription'
+import FilePreview from '@/components/FilePreview'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -48,6 +51,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </p>
         </div>
         <div className="flex items-center gap-3 self-start sm:self-auto">
+          {!isAdmin && ['delivered', 'completed'].includes(order.status) && (
+            <Link
+              href={`/orders/new?type=${order.orderType ?? 'scratch'}&description=${encodeURIComponent(order.description.slice(0, 500))}`}
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white transition-colors"
+            >
+              Reorder
+            </Link>
+          )}
           {isAdmin && order.labelUrl && (
             <a href={order.labelUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors">
@@ -70,6 +81,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       />
 
       {isAdmin && <AdminNotes orderId={id} initialNotes={order.adminNotes ?? null} />}
+      {isAdmin && <CustomerNotes orderId={id} initialNotes={order.customerNotes ?? null} />}
+      {!isAdmin && order.customerNotes && (
+        <div className="card p-5 mb-6 border border-blue-800/40 bg-blue-950/10">
+          <h2 className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-2">Note from Team</h2>
+          <p className="text-sm text-zinc-300 whitespace-pre-wrap">{order.customerNotes}</p>
+        </div>
+      )}
 
       {isAdmin && order.quoteHistory.length > 0 && (
         <div className="card p-5 mb-6">
@@ -126,16 +144,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {order.files.length > 0 && (
         <div className="card p-5 mb-6">
           <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Uploaded Files</h2>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {order.files.map((file) => (
-              <a key={file.id} href={file.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 transition-colors text-sm">
-                <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                </svg>
-                <span className="text-zinc-300 hover:text-white truncate">{file.name || 'Uploaded file'}</span>
-              </a>
+              <FilePreview key={file.id} url={file.url} name={file.name ?? ''} />
             ))}
           </div>
         </div>

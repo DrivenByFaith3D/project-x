@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 type OrderType = 'stl' | 'image' | 'scratch' | null
@@ -50,6 +50,7 @@ const ORDER_TYPES = [
 
 export default function NewOrderPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [orderType, setOrderType] = useState<OrderType>(null)
   const [description, setDescription] = useState('')
@@ -57,6 +58,18 @@ export default function NewOrderPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Pre-fill from reorder query params
+  useEffect(() => {
+    const typeParam = searchParams.get('type') as OrderType
+    const descParam = searchParams.get('description')
+    if (typeParam && ORDER_TYPES.find(t => t.id === typeParam)) {
+      setOrderType(typeParam)
+    }
+    if (descParam) {
+      setDescription(decodeURIComponent(descParam).slice(0, 1000))
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedType = ORDER_TYPES.find(t => t.id === orderType)
 

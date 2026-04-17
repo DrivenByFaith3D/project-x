@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [addressCountry, setAddressCountry] = useState('US')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [needsVerification, setNeedsVerification] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -38,6 +39,12 @@ export default function SignupPage() {
       return
     }
 
+    if (data.needsVerification) {
+      setNeedsVerification(true)
+      setLoading(false)
+      return
+    }
+
     await signIn('credentials', { email, password, redirect: false })
     router.push('/orders')
     router.refresh()
@@ -46,6 +53,22 @@ export default function SignupPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="card p-8 w-full max-w-md">
+        {needsVerification ? (
+          <div className="text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mx-auto">
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-white">Check your email</h1>
+            <p className="text-zinc-400 text-sm">
+              We sent a verification link to <strong className="text-white">{email}</strong>. Click it to activate your account before signing in.
+            </p>
+            <p className="text-zinc-500 text-xs">Didn&apos;t receive it? Check your spam folder.</p>
+            <Link href="/login" className="btn-secondary w-full inline-block text-center mt-2">Back to Sign In</Link>
+          </div>
+        ) : (
+        <>
         <div className="text-center mb-8">
           <Image src="/logo.png" alt="DrivenByFaith3D" width={64} height={64} className="mx-auto mb-4 object-contain" />
           <h1 className="text-2xl font-bold text-white">Create account</h1>
@@ -129,6 +152,8 @@ export default function SignupPage() {
           Already have an account?{' '}
           <Link href="/login" className="text-white font-medium hover:underline">Sign in</Link>
         </p>
+        </>
+        )}
       </div>
     </div>
   )

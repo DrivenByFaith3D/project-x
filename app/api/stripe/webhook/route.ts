@@ -30,10 +30,18 @@ export async function POST(req: NextRequest) {
 
     if (orderId && session.payment_status === 'paid') {
       // Custom order payment
-      await prisma.order.update({
+      const order = await prisma.order.update({
         where: { id: orderId },
         data: { paymentStatus: 'paid', status: 'in_progress' },
+        select: { userId: true },
       })
+      // Save Stripe customer ID for portal access
+      if (session.customer && typeof session.customer === 'string') {
+        await prisma.user.update({
+          where: { id: order.userId },
+          data: { stripeCustomerId: session.customer },
+        }).catch(() => {}) // ignore unique constraint if already set
+      }
     } else if (productId && session.payment_status === 'paid') {
       // Product listing purchase — email admin
       try {

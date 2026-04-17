@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { sendEmail, verificationEmailHtml } from '@/lib/brevo'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const { success } = rateLimit(`signup:${ip}`, 5, 60 * 60 * 1000)
+  if (!success) return NextResponse.json({ error: 'Too many signups. Try again later.' }, { status: 429 })
+
   const { email, password, name, addressStreet, addressCity, addressState, addressZip, addressCountry } = await req.json()
 
   if (!email || !password || password.length < 6 || !name) {
@@ -16,13 +23,16 @@ export async function POST(req: NextRequest) {
 
   const hashed = await bcrypt.hash(password, 10)
 
-  // First user with ADMIN_EMAIL gets admin role
   const adminEmail = process.env.ADMIN_EMAIL
-  const role = adminEmail && email === adminEmail ? 'admin' : 'user'
+  const isAdmin = adminEmail && email === adminEmail
+  const role = isAdmin ? 'admin' : 'user'
+  const verificationToken = isAdmin ? null : randomUUID()
 
   const user = await prisma.user.create({
     data: {
       email, password: hashed, name, role,
+      emailVerified: isAdmin ? true : false,
+      verificationToken,
       addressStreet: addressStreet || null,
       addressCity: addressCity || null,
       addressState: addressState || null,
@@ -31,5 +41,19 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  return NextResponse.json({ id: user.id, email: user.email, role: user.role })
+  if (!isAdmin && verificationToken) {
+    try {
+      const appUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').trim()
+      await sendEmail({
+        to: email,
+        toName: name,
+        subject: 'Verify your email — DrivenByFaith3D',
+        htmlContent: verificationEmailHtml(`${appUrl}/verify-email?token=${verificationToken}`),
+      })
+    } catch (e) {
+      console.error('Verification email failed:', e)
+    }
+  }
+
+  return NextResponse.json({ id: user.id, email: user.email, role: user.role, needsVerification: !isAdmin })
 }

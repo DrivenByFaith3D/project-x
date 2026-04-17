@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, newMessageEmailHtml } from '@/lib/brevo'
 import { requireAuth } from '@/lib/api'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth()
@@ -38,6 +39,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth()
   if (error) return error
+
+  const { success } = rateLimit(`msg:${session.user.id}`, 30, 60_000)
+  if (!success) return NextResponse.json({ error: 'Sending too fast. Please slow down.' }, { status: 429 })
 
   const { orderId, content, fileUrl } = await req.json()
   if (!orderId || !content?.trim()) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
