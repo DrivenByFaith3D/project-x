@@ -42,11 +42,13 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     orderBy: { createdAt: 'asc' },
   })
 
-  await prisma.orderView.upsert({
-    where: { userId_orderId: { userId: session.user.id, orderId: id } },
-    create: { userId: session.user.id, orderId: id },
-    update: { viewedAt: new Date() },
-  })
+  try {
+    await prisma.orderView.upsert({
+      where: { userId_orderId: { userId: session.user.id, orderId: id } },
+      create: { userId: session.user.id, orderId: id },
+      update: { viewedAt: new Date() },
+    })
+  } catch { /* ignore if user record not found */ }
 
   const defaultAddr = order.user.addresses[0] ?? null
 
