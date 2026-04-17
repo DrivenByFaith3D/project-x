@@ -151,7 +151,7 @@ export function newMessageEmailHtml(orderId: string, appUrl: string) {
 }
 
 export function quoteReadyEmailHtml(orderId: string, orderLabel: string, amount: number, appUrl: string) {
-  const orderUrl = `${appUrl}/orders/${orderId}`
+  const orderUrl = `${appUrl}/pay/${orderId}`
   return baseTemplate(
     'Your quote is ready',
     `
