@@ -28,6 +28,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     orderBy: { createdAt: 'asc' },
   })
 
+  // Mark messages as read for current user
+  await prisma.orderView.upsert({
+    where: { userId_orderId: { userId: session.user.id, orderId: id } },
+    create: { userId: session.user.id, orderId: id },
+    update: { viewedAt: new Date() },
+  })
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

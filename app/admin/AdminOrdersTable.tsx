@@ -263,7 +263,7 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
   return createPortal(modal, document.body)
 }
 
-function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onAction: () => void }) {
+function OrderRow({ order, tab, unread, onAction }: { order: Order; tab: string; unread: number; onAction: () => void }) {
   const router = useRouter()
   const [status, setStatus] = useState<OrderStatus>(order.status as OrderStatus)
   const [showShipModal, setShowShipModal] = useState(false)
@@ -318,9 +318,16 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
     <>
       <tr className="hover:bg-zinc-800/50 transition-colors">
         <td className="px-5 py-4">
-          <Link href={`/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
-            {formatOrderId(order)}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={`/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
+              {formatOrderId(order)}
+            </Link>
+            {unread > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-blue-600 text-white rounded-full">
+                {unread}
+              </span>
+            )}
+          </div>
         </td>
         <td className="px-5 py-4 text-zinc-400">{order.userEmail}</td>
         <td className="px-5 py-4">
@@ -448,29 +455,44 @@ function OrderRow({ order, tab, onAction }: { order: Order; tab: string; onActio
 
 type Tab = 'active' | 'delivered' | 'archived' | 'trash'
 
-export default function AdminOrdersTable({ initialOrders }: { initialOrders: Order[] }) {
+export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { initialOrders: Order[]; unreadMap?: Record<string, number> }) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('active')
+  const [search, setSearch] = useState('')
 
   const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status !== 'delivered')
   const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status === 'delivered')
   const archived  = initialOrders.filter(o => !!o.archivedAt && !o.deletedAt)
   const trash     = initialOrders.filter(o => !!o.deletedAt)
 
-  const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: 'active',    label: 'Active',    count: active.length },
+  // Count unread across active orders for the tab badge
+  const activeUnread = active.filter(o => (unreadMap[o.id] ?? 0) > 0).length
+
+  const tabs: { id: Tab; label: string; count: number; unread?: number }[] = [
+    { id: 'active',    label: 'Active',    count: active.length,    unread: activeUnread },
     { id: 'delivered', label: 'Delivered', count: delivered.length },
     { id: 'archived',  label: 'Archived',  count: archived.length },
     { id: 'trash',     label: 'Trash',     count: trash.length },
   ]
 
-  const rows = tab === 'active' ? active : tab === 'delivered' ? delivered : tab === 'archived' ? archived : trash
+  const baseRows = tab === 'active' ? active : tab === 'delivered' ? delivered : tab === 'archived' ? archived : trash
+
+  const rows = search.trim()
+    ? baseRows.filter(o => {
+        const q = search.toLowerCase()
+        return (
+          formatOrderId(o).toLowerCase().includes(q) ||
+          o.userEmail.toLowerCase().includes(q) ||
+          (o.userName ?? '').toLowerCase().includes(q) ||
+          o.description.toLowerCase().includes(q)
+        )
+      })
+    : baseRows
 
   return (
     <div className="card overflow-hidden">
-      {/* Header with tabs */}
-      <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between gap-4">
-        <h2 className="font-semibold text-white">All Orders</h2>
+      {/* Header with tabs and search */}
+      <div className="px-5 py-4 border-b border-zinc-800 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1">
           {tabs.map((t) => (
             <button
@@ -483,7 +505,12 @@ export default function AdminOrdersTable({ initialOrders }: { initialOrders: Ord
               }`}
             >
               {t.label}
-              {t.count > 0 && (
+              {(t.unread ?? 0) > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold bg-blue-600 text-white rounded-full">
+                  {t.unread}
+                </span>
+              )}
+              {t.count > 0 && (t.unread ?? 0) === 0 && (
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                   tab === t.id ? 'bg-zinc-600 text-zinc-200' : 'bg-zinc-800 text-zinc-500'
                 }`}>
@@ -492,6 +519,18 @@ export default function AdminOrdersTable({ initialOrders }: { initialOrders: Ord
               )}
             </button>
           ))}
+        </div>
+        <div className="relative">
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search orders…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg pl-7 pr-3 py-1.5 w-48 focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
+          />
         </div>
       </div>
 
@@ -526,7 +565,7 @@ export default function AdminOrdersTable({ initialOrders }: { initialOrders: Ord
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {rows.map((order) => (
-              <OrderRow key={order.id} order={order} tab={tab} onAction={() => router.refresh()} />
+              <OrderRow key={order.id} order={order} tab={tab} unread={unreadMap[order.id] ?? 0} onAction={() => router.refresh()} />
             ))}
             {rows.length === 0 && (
               <tr>
