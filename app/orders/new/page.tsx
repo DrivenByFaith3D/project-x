@@ -184,15 +184,21 @@ export default function NewOrderPage() {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1">
-              Description <span className="text-zinc-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-zinc-300">
+                Description <span className="text-zinc-500">*</span>
+              </label>
+              <span className={`text-xs ${description.length > 900 ? description.length >= 1000 ? 'text-red-400' : 'text-amber-400' : 'text-zinc-600'}`}>
+                {description.length}/1000
+              </span>
+            </div>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 1000))}
               className="input resize-none"
               rows={5}
               placeholder={selectedType?.placeholder}
+              maxLength={1000}
               required
             />
           </div>

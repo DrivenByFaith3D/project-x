@@ -6,6 +6,7 @@ import ChatWindow from '@/components/ChatWindow'
 import ShippingStatus from '@/components/ShippingStatus'
 import PayButton from '@/components/PayButton'
 import AdminNotes from '@/components/AdminNotes'
+import OrderDescription from '@/components/OrderDescription'
 import { STATUS_STYLES, STATUS_LABELS, formatOrderId } from '@/lib/constants'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -62,10 +63,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <div className="card p-5 mb-6">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Description</h2>
-        <p className="text-zinc-200">{order.description}</p>
-      </div>
+      <OrderDescription
+        orderId={id}
+        initialDescription={order.description}
+        canEdit={!isAdmin && order.status === 'pending'}
+      />
 
       {isAdmin && <AdminNotes orderId={id} initialNotes={order.adminNotes ?? null} />}
 

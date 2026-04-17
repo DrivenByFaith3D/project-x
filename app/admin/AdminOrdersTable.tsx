@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -301,6 +301,7 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
 
   async function doAction(action: 'archive' | 'delete' | 'restore') {
     if (action === 'delete' && !confirm('Move this order to trash? It will be permanently deleted after 30 days.')) return
+    if (action === 'archive' && !confirm('Archive this order? You can restore it at any time.')) return
     setBusy(true)
     await fetch('/api/orders/manage', {
       method: 'PATCH',
@@ -461,6 +462,8 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
   )
 }
 
+const PAGE_SIZE = 20
+
 type Tab = 'active' | 'delivered' | 'archived' | 'trash'
 
 export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { initialOrders: Order[]; unreadMap?: Record<string, number> }) {
@@ -469,6 +472,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = useState(false)
+  const [page, setPage] = useState(1)
 
   const active    = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status !== 'delivered')
   const delivered = initialOrders.filter(o => !o.archivedAt && !o.deletedAt && o.status === 'delivered')
@@ -486,7 +490,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
 
   const baseRows = tab === 'active' ? active : tab === 'delivered' ? delivered : tab === 'archived' ? archived : trash
 
-  const rows = search.trim()
+  const filteredRows = search.trim()
     ? baseRows.filter(o => {
         const q = search.toLowerCase()
         return (
@@ -498,14 +502,21 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
       })
     : baseRows
 
-  const allSelected = rows.length > 0 && rows.every(o => selected.has(o.id))
-  const someSelected = rows.some(o => selected.has(o.id))
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const rows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+
+  // Reset to page 1 when search changes
+  useEffect(() => { setPage(1) }, [search])
+
+  const allSelected = filteredRows.length > 0 && filteredRows.every(o => selected.has(o.id))
+  const someSelected = filteredRows.some(o => selected.has(o.id))
 
   function toggleAll() {
     if (allSelected) {
-      setSelected(prev => { const next = new Set(prev); rows.forEach(o => next.delete(o.id)); return next })
+      setSelected(prev => { const next = new Set(prev); filteredRows.forEach(o => next.delete(o.id)); return next })
     } else {
-      setSelected(prev => { const next = new Set(prev); rows.forEach(o => next.add(o.id)); return next })
+      setSelected(prev => { const next = new Set(prev); filteredRows.forEach(o => next.add(o.id)); return next })
     }
   }
 
@@ -513,16 +524,18 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
     setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
   }
 
-  // Clear selection when tab changes
+  // Clear selection and reset page when tab changes
   function switchTab(t: Tab) {
     setTab(t)
     setSelected(new Set())
+    setPage(1)
   }
 
   async function bulkAction(action: 'archive' | 'delete' | 'restore') {
     const ids = Array.from(selected).filter(id => rows.some(o => o.id === id))
     if (ids.length === 0) return
-    if (action === 'delete' && !confirm(`Move ${ids.length} order${ids.length > 1 ? 's' : ''} to trash?`)) return
+    if (action === 'delete' && !confirm(`Move ${ids.length} order${ids.length > 1 ? 's' : ''} to trash? They will be permanently deleted after 30 days.`)) return
+    if (action === 'archive' && !confirm(`Archive ${ids.length} order${ids.length > 1 ? 's' : ''}? You can restore them at any time.`)) return
     setBulkBusy(true)
     await fetch('/api/orders/manage', {
       method: 'PATCH',
@@ -534,7 +547,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
     router.refresh()
   }
 
-  const selectedInView = rows.filter(o => selected.has(o.id)).length
+  const selectedInView = filteredRows.filter(o => selected.has(o.id)).length
 
   // Determine which bulk actions are available per tab
   const bulkActions: { label: string; action: 'archive' | 'delete' | 'restore'; className: string }[] =
@@ -647,6 +660,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                   ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected }}
                   onChange={toggleAll}
                   className="accent-blue-600 cursor-pointer"
+                  title={allSelected ? 'Deselect all' : 'Select all'}
                 />
               </th>
               <th className="px-3 py-3 text-left">Order ID</th>
@@ -678,6 +692,51 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="px-5 py-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
+          <span>
+            {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredRows.length)} of {filteredRows.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+            >
+              ←
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | '…')[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('…')
+                acc.push(p)
+                return acc
+              }, [])
+              .map((p, i) =>
+                p === '…' ? (
+                  <span key={`ellipsis-${i}`} className="px-1">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p as number)}
+                    className={`w-7 h-7 rounded transition-colors ${safePage === p ? 'bg-zinc-700 text-white' : 'hover:bg-zinc-800'}`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

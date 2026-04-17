@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 interface Order {
   id: string
@@ -23,6 +23,29 @@ interface TrackingInfo {
   eta: string | null
   tracking_url: string | null
   tracking_history: TrackingEvent[]
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [text])
+  return (
+    <button onClick={copy} title="Copy tracking number" className="ml-1 text-zinc-600 hover:text-zinc-300 transition-colors">
+      {copied ? (
+        <svg className="w-3.5 h-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      )}
+    </button>
+  )
 }
 
 export default function ShippingStatus({ order }: { order: Order }) {
@@ -54,7 +77,7 @@ export default function ShippingStatus({ order }: { order: Order }) {
       {!loading && !tracking && !error && (
         <div className="text-sm text-zinc-400 space-y-1">
           <p><span className="text-zinc-500">Carrier:</span> {order.carrier}</p>
-          <p><span className="text-zinc-500">Tracking #:</span> {order.trackingNumber}</p>
+          <p className="flex items-center gap-1"><span className="text-zinc-500">Tracking #:</span> {order.trackingNumber}<CopyButton text={order.trackingNumber!} /></p>
           {order.trackingUrl && (
             <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-white hover:underline">
               Track on carrier site →
@@ -65,17 +88,27 @@ export default function ShippingStatus({ order }: { order: Order }) {
       {tracking && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: 'Carrier', value: tracking.carrier },
-              { label: 'Tracking #', value: tracking.tracking_number },
-              { label: 'Status', value: tracking.status?.replace(/_/g, ' ') },
-              ...(tracking.eta ? [{ label: 'Est. Delivery', value: new Date(tracking.eta).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }] : []),
-            ].map((item) => (
-              <div key={item.label} className="bg-zinc-800 rounded-lg p-3">
-                <p className="text-xs text-zinc-500">{item.label}</p>
-                <p className="font-medium text-sm text-white capitalize">{item.value}</p>
+            <div className="bg-zinc-800 rounded-lg p-3">
+              <p className="text-xs text-zinc-500">Carrier</p>
+              <p className="font-medium text-sm text-white capitalize">{tracking.carrier}</p>
+            </div>
+            <div className="bg-zinc-800 rounded-lg p-3">
+              <p className="text-xs text-zinc-500">Tracking #</p>
+              <div className="flex items-center">
+                <p className="font-medium text-sm text-white font-mono truncate">{tracking.tracking_number}</p>
+                <CopyButton text={tracking.tracking_number} />
               </div>
-            ))}
+            </div>
+            <div className="bg-zinc-800 rounded-lg p-3">
+              <p className="text-xs text-zinc-500">Status</p>
+              <p className="font-medium text-sm text-white capitalize">{tracking.status?.replace(/_/g, ' ')}</p>
+            </div>
+            {tracking.eta && (
+              <div className="bg-zinc-800 rounded-lg p-3">
+                <p className="text-xs text-zinc-500">Est. Delivery</p>
+                <p className="font-medium text-sm text-white">{new Date(tracking.eta).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+              </div>
+            )}
           </div>
           {tracking.tracking_history?.length > 0 && (
             <div className="space-y-3">

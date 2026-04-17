@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
-import { sendEmail, productPurchaseAdminEmailHtml } from '@/lib/brevo'
+import { sendEmail, productPurchaseAdminEmailHtml, productPurchaseBuyerEmailHtml } from '@/lib/brevo'
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not set')
@@ -46,6 +46,14 @@ export async function POST(req: NextRequest) {
             to: admin.email,
             subject: `New product purchase: ${productName ?? 'Product'}`,
             htmlContent: productPurchaseAdminEmailHtml(productName ?? 'Product', amount, buyerEmail, appUrl),
+          })
+        }
+        // Email the buyer
+        if (buyerEmail && buyerEmail !== 'Unknown') {
+          await sendEmail({
+            to: buyerEmail,
+            subject: `Order confirmed: ${productName ?? 'Your order'}`,
+            htmlContent: productPurchaseBuyerEmailHtml(productName ?? 'Your order', amount, appUrl),
           })
         }
       } catch (e) {

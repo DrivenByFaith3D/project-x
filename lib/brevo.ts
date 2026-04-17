@@ -51,6 +51,22 @@ function baseTemplate(title: string, body: string, ctaUrl: string, ctaLabel: str
   `
 }
 
+export function productPurchaseBuyerEmailHtml(productName: string, amount: number, appUrl: string) {
+  return baseTemplate(
+    `Order confirmed: ${productName}`,
+    `
+      <p style="color: #374151;">Thank you for your purchase! We've received your order and will be in touch soon.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Product</td><td style="padding: 8px 0; color: #111827; font-weight: 600;">${productName}</td></tr>
+        <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Amount paid</td><td style="padding: 8px 0; color: #111827; font-weight: 600;">$${amount.toFixed(2)}</td></tr>
+      </table>
+      <p style="color: #374151;">We'll reach out to coordinate delivery. If you have any questions, feel free to reply to this email.</p>
+    `,
+    appUrl,
+    'Visit Our Shop'
+  )
+}
+
 export function productPurchaseAdminEmailHtml(productName: string, amount: number, buyerEmail: string, appUrl: string) {
   return baseTemplate(
     `New product purchase: ${productName}`,

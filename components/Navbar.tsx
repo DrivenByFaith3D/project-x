@@ -14,6 +14,7 @@ export default async function Navbar() {
     ...(isAdmin ? [
       { label: 'Dashboard', href: '/' },
       { label: 'Orders', href: '/admin/orders' },
+      { label: 'Products', href: '/admin/products' },
       { label: 'Users', href: '/admin/users' },
     ] : []),
   ]
