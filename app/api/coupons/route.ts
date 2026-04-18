@@ -15,7 +15,14 @@ export async function GET(req: NextRequest) {
   if (coupon.expiresAt && coupon.expiresAt < new Date()) return NextResponse.json({ error: 'Coupon has expired' }, { status: 400 })
   if (coupon.maxUses && coupon.uses >= coupon.maxUses) return NextResponse.json({ error: 'Coupon has reached its usage limit' }, { status: 400 })
 
-  return NextResponse.json({ id: coupon.id, code: coupon.code, type: coupon.type, value: coupon.value })
+  return NextResponse.json({
+    id: coupon.id,
+    code: coupon.code,
+    type: coupon.type,
+    value: coupon.value,
+    minQuantity: coupon.minQuantity,
+    minOrderValue: coupon.minOrderValue,
+  })
 }
 
 // Admin: create coupon
@@ -24,7 +31,7 @@ export async function POST(req: NextRequest) {
   if (error) return error
   if (session.user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { code, type, value, maxUses, expiresAt } = await req.json()
+  const { code, type, value, maxUses, expiresAt, minQuantity, minOrderValue } = await req.json()
   if (!code || !type || !value) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
   const coupon = await prisma.coupon.create({
@@ -34,6 +41,8 @@ export async function POST(req: NextRequest) {
       value: parseFloat(value),
       maxUses: maxUses ? parseInt(maxUses) : null,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
+      minQuantity: minQuantity ? parseInt(minQuantity) : null,
+      minOrderValue: minOrderValue ? parseFloat(minOrderValue) : null,
     },
   })
 

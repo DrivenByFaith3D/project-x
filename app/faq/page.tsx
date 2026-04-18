@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: 'FAQ' }
 const FAQS = [
   {
     q: 'What file formats do you accept?',
-    a: 'We primarily work with STL files, which is the standard format for 3D printing. We also accept OBJ, 3MF, and STEP files. If you only have an image or idea, you can describe it and we\'ll work with you.',
+    a: 'We accept STL and 3MF files — the two standard formats for 3D printing. If you only have an image or idea, no worries — just describe what you want and we\'ll take it from there.',
   },
   {
     q: 'How long does it take to get a quote?',
@@ -16,8 +16,8 @@ const FAQS = [
     a: 'Most orders ship within 3–7 business days depending on size and complexity. Rush orders may be available — just mention it in your description.',
   },
   {
-    q: 'What materials do you print with?',
-    a: 'We primarily use PLA and PETG for most prints. Special materials like ABS, TPU (flexible), or resin may be available upon request.',
+    q: 'What material do you print with?',
+    a: 'We print exclusively with PLA. It\'s a high-quality, eco-friendly material that produces great detail and is available in a wide range of colors.',
   },
   {
     q: 'What colors are available?',

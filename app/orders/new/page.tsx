@@ -16,9 +16,13 @@ const ORDER_TYPES = [
     ),
     title: 'I have an STL file',
     description: 'Upload your ready-to-print 3D model file',
-    accept: '.stl',
-    fileLabel: 'Upload STL File',
-    placeholder: 'Describe material, color, quantity, finish, or any special requirements…',
+    pricingLabel: 'Best value',
+    pricingNote: 'Print-ready file means lower cost — just pick your color & finish.',
+    pricingColor: 'text-emerald-400',
+    pricingDots: 1,
+    accept: '.stl,.3mf',
+    fileLabel: 'Upload STL or 3MF File',
+    placeholder: 'Describe color, quantity, finish, or any special requirements…',
   },
   {
     id: 'image' as OrderType,
@@ -29,9 +33,13 @@ const ORDER_TYPES = [
     ),
     title: 'I have an image or reference',
     description: 'Share a photo or reference of what you want printed',
+    pricingLabel: 'Moderate',
+    pricingNote: 'Includes modeling from your reference — a great middle ground.',
+    pricingColor: 'text-amber-400',
+    pricingDots: 2,
     accept: '.png,.jpg,.jpeg,.gif,.webp',
     fileLabel: 'Upload Image',
-    placeholder: 'Describe what you want — dimensions, material, color, how it will be used…',
+    placeholder: 'Describe what you want — dimensions, color, how it will be used…',
   },
   {
     id: 'scratch' as OrderType,
@@ -40,8 +48,12 @@ const ORDER_TYPES = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
       </svg>
     ),
-    title: 'Starting from scratch',
-    description: 'Have an idea but no files yet — describe your vision',
+    title: 'Design it with me',
+    description: 'Have an idea but no files yet — we\'ll design it together from scratch',
+    pricingLabel: 'Full custom',
+    pricingNote: 'End-to-end design + print. Perfect for one-of-a-kind pieces like a custom desk organizer.',
+    pricingColor: 'text-violet-400',
+    pricingDots: 3,
     accept: '',
     fileLabel: '',
     placeholder: 'Tell us your idea — what do you want to create? Include any details about size, function, style, or inspiration…',
@@ -122,8 +134,19 @@ export default function NewOrderPage() {
                 <h2 className="font-semibold text-white text-sm mb-1">{type.title}</h2>
                 <p className="text-zinc-500 text-xs leading-relaxed">{type.description}</p>
               </div>
-              <div className="mt-auto">
-                <span className="text-xs text-zinc-600 group-hover:text-zinc-400 transition-colors">Get started →</span>
+              <div className="border-t border-zinc-800 pt-3 mt-auto">
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-xs font-medium ${type.pricingColor}`}>{type.pricingLabel}</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3].map((dot) => (
+                      <span
+                        key={dot}
+                        className={`w-1.5 h-1.5 rounded-full ${dot <= type.pricingDots ? type.pricingColor.replace('text-', 'bg-') : 'bg-zinc-700'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-600 leading-relaxed">{type.pricingNote}</p>
               </div>
             </button>
           ))}
@@ -180,7 +203,7 @@ export default function NewOrderPage() {
                     </svg>
                     <p className="text-sm text-zinc-400">Click to upload</p>
                     <p className="text-xs text-zinc-600 mt-1">
-                      {orderType === 'stl' ? 'STL files up to 50MB' : 'PNG, JPG, GIF, WebP up to 50MB'}
+                      {orderType === 'stl' ? 'STL or 3MF files up to 50MB' : 'PNG, JPG, GIF, WebP up to 50MB'}
                     </p>
                   </>
                 )}

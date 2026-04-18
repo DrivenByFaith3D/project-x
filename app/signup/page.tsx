@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
   const [zip, setZip] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [needsVerification, setNeedsVerification] = useState(false)
@@ -107,6 +108,22 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* Terms of service */}
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-white accent-white cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-zinc-400 leading-relaxed">
+              I agree to the{' '}
+              <Link href="/terms" target="_blank" className="text-white hover:underline">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" target="_blank" className="text-white hover:underline">Privacy Policy</Link>
+            </span>
+          </label>
+
           {error === 'ACCOUNT_EXISTS' ? (
             <div className="text-sm bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-zinc-300">
               An account with this email already exists.{' '}
@@ -119,7 +136,7 @@ export default function SignupPage() {
             <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>
           ) : null}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full">
+          <button type="submit" disabled={loading || !agreedToTerms} className="btn-primary w-full">
             {loading ? 'Creating account…' : 'Create Account'}
           </button>
         </form>

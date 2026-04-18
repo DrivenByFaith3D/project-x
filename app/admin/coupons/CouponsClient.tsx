@@ -12,6 +12,8 @@ interface Coupon {
   expiresAt: Date | string | null
   active: boolean
   createdAt: Date | string
+  minQuantity: number | null
+  minOrderValue: number | null
 }
 
 export default function CouponsClient({ initialCoupons }: { initialCoupons: Coupon[] }) {
@@ -22,6 +24,8 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
   const [value, setValue] = useState('')
   const [maxUses, setMaxUses] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
+  const [minQuantity, setMinQuantity] = useState('')
+  const [minOrderValue, setMinOrderValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,13 +35,13 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
     const res = await fetch('/api/coupons', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, type, value, maxUses: maxUses || null, expiresAt: expiresAt || null }),
+      body: JSON.stringify({ code, type, value, maxUses: maxUses || null, expiresAt: expiresAt || null, minQuantity: minQuantity || null, minOrderValue: minOrderValue || null }),
     })
     const data = await res.json()
     setSaving(false)
     if (!res.ok) { setError(data.error); return }
     setCoupons(c => [data, ...c])
-    setCode(''); setValue(''); setMaxUses(''); setExpiresAt(''); setShowForm(false)
+    setCode(''); setValue(''); setMaxUses(''); setExpiresAt(''); setMinQuantity(''); setMinOrderValue(''); setShowForm(false)
   }
 
   async function toggle(id: string, active: boolean) {
@@ -90,6 +94,21 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
               <label className="block text-xs font-medium text-zinc-400 mb-1">Expiry Date (optional)</label>
               <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="input w-full" />
             </div>
+            <div className="col-span-2 border-t border-zinc-800 pt-3">
+              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Conditions (optional)</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">Min. Quantity</label>
+                  <input type="number" value={minQuantity} onChange={e => setMinQuantity(e.target.value)} min="1" step="1" placeholder="e.g. 2" className="input w-full" />
+                  <p className="text-xs text-zinc-600 mt-1">Customer must order at least this many items</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">Min. Order Value ($)</label>
+                  <input type="number" value={minOrderValue} onChange={e => setMinOrderValue(e.target.value)} min="0.01" step="0.01" placeholder="e.g. 50.00" className="input w-full" />
+                  <p className="text-xs text-zinc-600 mt-1">Order total must be at least this amount</p>
+                </div>
+              </div>
+            </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button type="submit" disabled={saving} className="btn-primary text-sm">{saving ? 'Creating…' : 'Create Coupon'}</button>
@@ -102,6 +121,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
             <tr>
               <th className="px-5 py-3 text-left">Code</th>
               <th className="px-5 py-3 text-left">Discount</th>
+              <th className="px-5 py-3 text-left">Conditions</th>
               <th className="px-5 py-3 text-left">Uses</th>
               <th className="px-5 py-3 text-left">Expires</th>
               <th className="px-5 py-3 text-left">Status</th>
@@ -110,13 +130,21 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
           </thead>
           <tbody className="divide-y divide-zinc-800">
             {coupons.length === 0 && (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-zinc-600">No coupons yet</td></tr>
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-zinc-600">No coupons yet</td></tr>
             )}
             {coupons.map(c => (
               <tr key={c.id}>
                 <td className="px-5 py-3 font-mono font-semibold text-white">{c.code}</td>
                 <td className="px-5 py-3 text-zinc-300">
                   {c.type === 'percent' ? `${c.value}% off` : `$${c.value.toFixed(2)} off`}
+                </td>
+                <td className="px-5 py-3 text-zinc-400 text-xs">
+                  {c.minQuantity || c.minOrderValue ? (
+                    <div className="space-y-0.5">
+                      {c.minQuantity && <div>Min qty: {c.minQuantity}</div>}
+                      {c.minOrderValue && <div>Min order: ${c.minOrderValue.toFixed(2)}</div>}
+                    </div>
+                  ) : '—'}
                 </td>
                 <td className="px-5 py-3 text-zinc-400">
                   {c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''}

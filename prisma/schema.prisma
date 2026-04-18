@@ -165,13 +165,15 @@ model Review {
 }
 
 model Coupon {
-  id        String    @id @default(cuid())
-  code      String    @unique
-  type      String
-  value     Float
-  maxUses   Int?
-  uses      Int       @default(0)
-  expiresAt DateTime?
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
+  id            String    @id @default(cuid())
+  code          String    @unique
+  type          String
+  value         Float
+  maxUses       Int?
+  uses          Int       @default(0)
+  expiresAt     DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  minQuantity   Int?
+  minOrderValue Float?
 }

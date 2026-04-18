@@ -7,10 +7,13 @@ interface Coupon {
   code: string
   type: string
   value: number
+  minQuantity: number | null
+  minOrderValue: number | null
 }
 
-export default function CouponInput({ price, onApply }: {
+export default function CouponInput({ price, quantity = 1, onApply }: {
   price: number
+  quantity?: number
   onApply: (coupon: Coupon | null, discountedPrice: number) => void
 }) {
   const [code, setCode] = useState('')
@@ -25,6 +28,14 @@ export default function CouponInput({ price, onApply }: {
     const data = await res.json()
     setLoading(false)
     if (!res.ok) { setError(data.error); return }
+    if (data.minQuantity && quantity < data.minQuantity) {
+      setError(`This coupon requires a minimum of ${data.minQuantity} items`)
+      return
+    }
+    if (data.minOrderValue && price < data.minOrderValue) {
+      setError(`This coupon requires a minimum order of $${data.minOrderValue.toFixed(2)}`)
+      return
+    }
     const discounted = data.type === 'percent'
       ? price * (1 - data.value / 100)
       : Math.max(0, price - data.value)
@@ -47,6 +58,12 @@ export default function CouponInput({ price, onApply }: {
             <span className="text-green-400 text-sm font-semibold">{applied.code}</span>
             <span className="text-green-300 text-xs ml-2">
               {applied.type === 'percent' ? `${applied.value}% off` : `$${applied.value.toFixed(2)} off`}
+              {(applied.minQuantity || applied.minOrderValue) && (
+                <span className="text-green-600 ml-1">
+                  {applied.minQuantity ? `· ${applied.minQuantity}+ items` : ''}
+                  {applied.minOrderValue ? `· $${applied.minOrderValue.toFixed(2)}+ order` : ''}
+                </span>
+              )}
             </span>
           </div>
           <button onClick={remove} className="text-xs text-zinc-500 hover:text-white transition-colors">Remove</button>
