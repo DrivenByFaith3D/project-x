@@ -10,6 +10,8 @@ interface Product {
   price: number
   imageUrl: string | null
   createdAt: Date
+  reviewCount?: number
+  avgRating?: number
 }
 
 const EMPTY_FORM = { name: '', description: '', price: '', imageUrl: '' }

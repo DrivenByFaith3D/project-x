@@ -10,7 +10,7 @@ interface User {
   createdAt: Date
 }
 
-export default function UserRow({ user }: { user: User }) {
+export default function UserRow({ user, inlineActions }: { user: User; inlineActions?: boolean }) {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,6 +36,18 @@ export default function UserRow({ user }: { user: User }) {
     setLoading(false)
   }
 
+  const actions = (
+    <>
+      <button onClick={handleReset} disabled={loading} className="btn-secondary text-xs px-3 py-1.5">
+        {loading ? '…' : 'Reset Password'}
+      </button>
+      {success && <p className="text-xs text-green-400 mt-1">{success}</p>}
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+    </>
+  )
+
+  if (inlineActions) return <>{actions}</>
+
   return (
     <tr className="hover:bg-zinc-800/50 transition-colors">
       <td className="px-5 py-4 text-zinc-200">{user.name || '—'}</td>
@@ -49,13 +61,7 @@ export default function UserRow({ user }: { user: User }) {
       <td className="px-5 py-4 text-zinc-500 text-xs">
         {new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
       </td>
-      <td className="px-5 py-4">
-        <button onClick={handleReset} disabled={loading} className="btn-secondary text-xs px-3 py-1.5">
-          {loading ? '…' : 'Reset Password'}
-        </button>
-        {success && <p className="text-xs text-green-400 mt-1">{success}</p>}
-        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
-      </td>
+      <td className="px-5 py-4">{actions}</td>
     </tr>
   )
 }

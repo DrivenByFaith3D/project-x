@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ChatWindow from '@/components/ChatWindow'
+import OrderProgressBar from '@/components/OrderProgressBar'
 import ShippingStatus from '@/components/ShippingStatus'
 import PayButton from '@/components/PayButton'
 import AdminNotes from '@/components/AdminNotes'
@@ -80,6 +81,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </span>
         </div>
       </div>
+
+      {!isAdmin && <OrderProgressBar status={order.status} />}
 
       <OrderDescription
         orderId={id}

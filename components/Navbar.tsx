@@ -10,12 +10,15 @@ export default async function Navbar() {
 
   const navLinks = [
     { label: 'Listings', href: '/listings' },
+    { label: 'Gallery', href: '/gallery' },
     ...(!isAdmin && session ? [{ label: 'My Orders', href: '/orders' }] : []),
+    ...(!isAdmin ? [{ label: 'About', href: '/about' }, { label: 'FAQ', href: '/faq' }] : []),
     ...(isAdmin ? [
       { label: 'Dashboard', href: '/' },
       { label: 'Orders', href: '/admin/orders' },
       { label: 'Products', href: '/admin/products' },
       { label: 'Users', href: '/admin/users' },
+      { label: 'Coupons', href: '/admin/coupons' },
     ] : []),
   ]
 

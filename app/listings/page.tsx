@@ -1,10 +1,14 @@
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import ProductCard from '@/components/ProductCard'
 
 export default async function ListingsPage({ searchParams }: { searchParams: Promise<{ purchase?: string }> }) {
   const { purchase } = await searchParams
+  const session = await getServerSession(authOptions)
   const products = await prisma.product.findMany({
     orderBy: { createdAt: 'desc' },
+    include: { reviews: { select: { rating: true } } },
   })
 
   return (
@@ -34,9 +38,12 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.map((product) => {
+            const avg = product.reviews.length
+              ? product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
+              : null
+            return <ProductCard key={product.id} product={product} avgRating={avg} reviewCount={product.reviews.length} isLoggedIn={!!session} />
+          })}
         </div>
       )}
     </div>
