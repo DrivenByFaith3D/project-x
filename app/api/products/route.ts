@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest) {
   const { error } = await requireAdmin()
   if (error) return error
 
-  const { id, name, description, price, imageUrl } = await req.json()
+  const { id, name, description, price, imageUrl, inStock } = await req.json()
   if (!id) return NextResponse.json({ error: 'Product ID required' }, { status: 400 })
 
   const product = await prisma.product.update({
@@ -34,6 +34,7 @@ export async function PATCH(req: NextRequest) {
       ...(description !== undefined && { description: description || null }),
       ...(price !== undefined && { price: parseFloat(price) }),
       ...(imageUrl !== undefined && { imageUrl: imageUrl || null }),
+      ...(inStock !== undefined && { inStock }),
     },
   })
   return NextResponse.json(product)

@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   const orderId = formData.get('orderId') as string | null
+  const caption = (formData.get('caption') as string | null) || null
+  const category = (formData.get('category') as string | null) || null
 
   if (!file || !orderId) return NextResponse.json({ error: 'Missing file or orderId' }, { status: 400 })
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File too large (max 20MB)' }, { status: 400 })
@@ -20,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
   const { url } = await uploadFile(file, orderId)
-  const photo = await prisma.orderPhoto.create({ data: { orderId, url } })
+  const photo = await prisma.orderPhoto.create({ data: { orderId, url, caption, category } })
 
   return NextResponse.json(photo)
 }

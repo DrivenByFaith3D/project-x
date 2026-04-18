@@ -34,6 +34,7 @@ model Order {
   orderType      String?
   orderNumber    String?
   description    String
+  quantity       Int      @default(1)
   trackingNumber String?
   carrier        String?
   trackingStatus String?
@@ -124,6 +125,8 @@ model OrderPhoto {
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   url       String
+  caption   String?
+  category  String?
   createdAt DateTime @default(now())
 }
 
@@ -147,6 +150,7 @@ model Product {
   description String?
   price       Float
   imageUrl    String?
+  inStock     Boolean  @default(true)
   createdAt   DateTime @default(now())
 
   reviews     Review[]

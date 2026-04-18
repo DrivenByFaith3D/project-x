@@ -9,6 +9,7 @@ interface Product {
   description: string | null
   price: number
   imageUrl: string | null
+  inStock: boolean
   createdAt: Date
   reviewCount?: number
   avgRating?: number
@@ -72,6 +73,16 @@ export default function AdminProductsClient({ initialProducts }: { initialProduc
       setProducts([data, ...products])
     }
     cancelForm()
+  }
+
+  async function toggleStock(id: string, inStock: boolean) {
+    const res = await fetch('/api/products', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, inStock }),
+    })
+    const data = await res.json()
+    if (res.ok) setProducts(products.map(p => p.id === id ? { ...p, ...data } : p))
   }
 
   async function handleDelete(id: string, name: string) {
@@ -169,7 +180,12 @@ export default function AdminProductsClient({ initialProducts }: { initialProduc
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="font-semibold text-white text-sm leading-snug">{product.name}</h3>
-                  <span className="text-white font-bold text-sm shrink-0">${product.price.toFixed(2)}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${product.inStock ? 'bg-green-900/40 text-green-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                      {product.inStock ? 'In stock' : 'Out of stock'}
+                    </span>
+                    <span className="text-white font-bold text-sm">${product.price.toFixed(2)}</span>
+                  </div>
                 </div>
                 {product.description && (
                   <p className="text-zinc-500 text-xs leading-relaxed mb-3 flex-1">{product.description}</p>
@@ -178,6 +194,10 @@ export default function AdminProductsClient({ initialProducts }: { initialProduc
                   <button onClick={() => openEdit(product)} disabled={loading}
                     className="text-xs text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-40">
                     Edit
+                  </button>
+                  <button onClick={() => toggleStock(product.id, !product.inStock)} disabled={loading}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-40">
+                    {product.inStock ? 'Mark out of stock' : 'Mark in stock'}
                   </button>
                   <button onClick={() => handleDelete(product.id, product.name)} disabled={loading}
                     className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-400/10 disabled:opacity-40">

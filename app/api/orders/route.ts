@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const { success } = rateLimit(`order:${session.user.id}`, 10, 60 * 60_000)
   if (!success) return NextResponse.json({ error: 'Too many orders submitted. Try again later.' }, { status: 429 })
 
-  const { description, orderType } = await req.json()
+  const { description, orderType, quantity } = await req.json()
   if (!description?.trim()) return NextResponse.json({ error: 'Description required' }, { status: 400 })
 
   const type = orderType && TYPE_PREFIX[orderType] ? orderType : 'stl'
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       orderType: type,
       orderNumber,
+      quantity: quantity && quantity > 0 ? parseInt(quantity) : 1,
     },
   })
   await logOrderEvent(order.id, 'order_created', 'Order submitted')

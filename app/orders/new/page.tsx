@@ -1,8 +1,13 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+
+const DRAFT_KEY = 'order_draft'
+const ACCEPTED_STL_TYPES = ['.stl', '.3mf']
+const ACCEPTED_IMAGE_TYPES = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
 type OrderType = 'stl' | 'image' | 'scratch' | null
 
@@ -66,22 +71,50 @@ export default function NewOrderPage() {
   const { data: session } = useSession()
   const [orderType, setOrderType] = useState<OrderType>(null)
   const [description, setDescription] = useState('')
+  const [quantity, setQuantity] = useState(1)
   const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Pre-fill from reorder query params
+  // Pre-fill from reorder query params, then fall back to draft
   useEffect(() => {
     const typeParam = searchParams.get('type') as OrderType
     const descParam = searchParams.get('description')
     if (typeParam && ORDER_TYPES.find(t => t.id === typeParam)) {
       setOrderType(typeParam)
+      if (descParam) setDescription(decodeURIComponent(descParam).slice(0, 1000))
+      return
     }
-    if (descParam) {
-      setDescription(decodeURIComponent(descParam).slice(0, 1000))
-    }
+    // Restore draft
+    try {
+      const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}')
+      if (draft.orderType) setOrderType(draft.orderType)
+      if (draft.description) setDescription(draft.description)
+      if (draft.quantity) setQuantity(draft.quantity)
+    } catch {}
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Autosave draft whenever description/type/quantity changes
+  const saveDraft = useCallback(() => {
+    if (description || orderType) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ orderType, description, quantity }))
+    }
+  }, [orderType, description, quantity])
+
+  useEffect(() => { saveDraft() }, [saveDraft])
+
+  function validateFile(f: File, type: OrderType): string {
+    if (f.size > MAX_FILE_SIZE) return 'File is too large (max 50MB)'
+    const name = f.name.toLowerCase()
+    if (type === 'stl') {
+      if (!ACCEPTED_STL_TYPES.some(ext => name.endsWith(ext))) return 'Only STL or 3MF files are accepted'
+    } else {
+      if (!ACCEPTED_IMAGE_TYPES.some(ext => name.endsWith(ext))) return 'Only PNG, JPG, GIF, or WebP images are accepted'
+    }
+    return ''
+  }
 
   const selectedType = ORDER_TYPES.find(t => t.id === orderType)
 
@@ -95,7 +128,7 @@ export default function NewOrderPage() {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description, orderType }),
+      body: JSON.stringify({ description, orderType, quantity }),
     })
 
     const data = await res.json()
@@ -109,6 +142,7 @@ export default function NewOrderPage() {
       await fetch('/api/upload', { method: 'POST', body: formData })
     }
 
+    localStorage.removeItem(DRAFT_KEY)
     router.push(`/orders/${data.id}`)
   }
 
@@ -124,7 +158,7 @@ export default function NewOrderPage() {
           {ORDER_TYPES.map((type) => (
             <button
               key={type.id}
-              onClick={() => setOrderType(type.id)}
+              onClick={() => { setOrderType(type.id); setFile(null); setFileError('') }}
               className="card p-6 text-left hover:border-zinc-500 transition-all group flex flex-col gap-4"
             >
               <div className="text-zinc-400 group-hover:text-white transition-colors">
@@ -158,7 +192,7 @@ export default function NewOrderPage() {
   // Step 2 — fill in details
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button onClick={() => { setOrderType(null); setFile(null); setDescription('') }}
+      <button onClick={() => { setOrderType(null); setFile(null); setFileError(''); setDescription('') }}
         className="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-6">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -212,11 +246,42 @@ export default function NewOrderPage() {
                   type="file"
                   accept={selectedType?.accept}
                   className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null
+                    if (f) {
+                      const err = validateFile(f, orderType)
+                      if (err) { setFileError(err); setFile(null); e.target.value = ''; return }
+                    }
+                    setFileError('')
+                    setFile(f)
+                  }}
                 />
               </div>
             </div>
           )}
+
+          {fileError && (
+            <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{fileError}</p>
+          )}
+
+          {/* Quantity */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Quantity</label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 text-white hover:bg-zinc-700 transition-colors flex items-center justify-center text-lg font-medium"
+              >−</button>
+              <span className="text-white font-semibold text-lg w-8 text-center">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity(q => q + 1)}
+                className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 text-white hover:bg-zinc-700 transition-colors flex items-center justify-center text-lg font-medium"
+              >+</button>
+              {quantity > 1 && <span className="text-xs text-zinc-500">Ordering multiple of the same item</span>}
+            </div>
+          </div>
 
           {/* Description */}
           <div>
@@ -245,10 +310,11 @@ export default function NewOrderPage() {
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => router.back()} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={loading || !description.trim()} className="btn-primary flex-1">
+            <button type="submit" disabled={loading || !description.trim() || !!fileError} className="btn-primary flex-1">
               {loading ? 'Creating…' : 'Create Order'}
             </button>
           </div>
+          {description && <p className="text-xs text-zinc-700 text-center">Draft saved automatically</p>}
         </form>
       </div>
     </div>
