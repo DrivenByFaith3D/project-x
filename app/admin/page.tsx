@@ -12,10 +12,10 @@ export default async function AdminPage() {
   })
 
   const counts = {
-    pending:     orders.filter((o) => o.status === 'pending').length,
-    in_progress: orders.filter((o) => o.status === 'in_progress').length,
-    shipped:     orders.filter((o) => o.status === 'shipped').length,
-    completed:   orders.filter((o) => o.status === 'completed').length,
+    pending:          orders.filter((o) => o.status === 'pending').length,
+    in_progress:      orders.filter((o) => o.status === 'in_progress').length,
+    out_for_delivery: orders.filter((o) => ['label_created', 'in_transit', 'out_for_delivery'].includes(o.status)).length,
+    delivered:        orders.filter((o) => o.status === 'delivered').length,
   }
 
   return (
@@ -26,8 +26,8 @@ export default async function AdminPage() {
         {[
           { label: 'Pending',     value: counts.pending },
           { label: 'In Progress', value: counts.in_progress },
-          { label: 'Shipped',     value: counts.shipped },
-          { label: 'Completed',   value: counts.completed },
+          { label: 'Shipped',     value: counts.out_for_delivery },
+          { label: 'Delivered',   value: counts.delivered },
         ].map((stat) => (
           <div key={stat.label} className="card p-5">
             <p className="text-3xl font-bold text-white">{stat.value}</p>

@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
     })
   } catch (e) {
     console.error('Password reset email failed:', e)
-    return NextResponse.json({ error: 'Failed to send email. Please try again.' }, { status: 500 })
   }
 
+  // Always return success to prevent email enumeration
   return NextResponse.json({ ok: true })
 }

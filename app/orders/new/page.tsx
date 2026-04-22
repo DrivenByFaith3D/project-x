@@ -139,7 +139,14 @@ export default function NewOrderPage() {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('orderId', data.id)
-      await fetch('/api/upload', { method: 'POST', body: formData })
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!uploadRes.ok) {
+        const uploadData = await uploadRes.json().catch(() => ({}))
+        setError(uploadData.error ?? 'File upload failed. Your order was created but the file was not attached — please try uploading it from the order page.')
+        setLoading(false)
+        router.push(`/orders/${data.id}`)
+        return
+      }
     }
 
     localStorage.removeItem(DRAFT_KEY)

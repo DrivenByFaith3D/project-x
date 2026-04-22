@@ -59,7 +59,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </p>
         </div>
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          {!isAdmin && ['delivered', 'completed'].includes(order.status) && (
+          {!isAdmin && order.status === 'delivered' && (
             <Link
               href={`/orders/new?type=${order.orderType ?? 'scratch'}&description=${encodeURIComponent(order.description.slice(0, 500))}`}
               className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white transition-colors"
