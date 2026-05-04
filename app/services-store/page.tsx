@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import ContactForm from './ContactForm'
 
 export default function ServicesStorePage() {
   return (
@@ -120,22 +119,6 @@ export default function ServicesStorePage() {
         </div>
       </section>
 
-      {/* Section 4 — Contact/CTA Form */}
-      <section id="contact" className="bg-taupe/40 py-20 sm:py-28">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display leading-tight mb-4">
-                Ready to Unleash Your Print?
-              </h2>
-              <p className="text-charcoal/70 text-lg">
-                Complete the form. Let&apos;s build something unstoppable.
-              </p>
-            </div>
-            <ContactForm />
-          </div>
-        </div>
-      </section>
     </div>
   )
 }
