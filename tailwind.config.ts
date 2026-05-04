@@ -13,7 +13,7 @@ const config: Config = {
         taupe: '#D6D0C8',
         'taupe-dark': '#B8B0A6',
         charcoal: '#2C2C2C',
-        'warm-gray': '#8A8578',
+        'warm-gray': '#6B6459',
       },
       fontFamily: {
         serif: ['Georgia', 'Times New Roman', 'serif'],
