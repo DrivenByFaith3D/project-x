@@ -24,6 +24,7 @@ model User {
   orderViews          OrderView[]
   passwordResetTokens PasswordResetToken[]
   addresses           Address[]
+  reviews             Review[]
 }
 
 model Order {
@@ -161,6 +162,7 @@ model Review {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   rating    Int
   comment   String?
   createdAt DateTime @default(now())

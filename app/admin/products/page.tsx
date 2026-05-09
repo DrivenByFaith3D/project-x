@@ -37,7 +37,7 @@ export default async function AdminProductsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-white">Products</h1>
+        <h1 className="text-2xl font-bold text-charcoal">Products</h1>
       </div>
 
       {products.length > 0 && (
@@ -49,8 +49,8 @@ export default async function AdminProductsPage() {
             { label: 'Most Reviewed', value: mostReviewed ? mostReviewed.name.slice(0, 14) : '—' },
           ].map(stat => (
             <div key={stat.label} className="card p-4">
-              <p className="text-lg font-bold text-white">{stat.value}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{stat.label}</p>
+              <p className="text-lg font-bold text-charcoal">{stat.value}</p>
+              <p className="text-xs text-warm-gray mt-0.5">{stat.label}</p>
             </div>
           ))}
         </div>

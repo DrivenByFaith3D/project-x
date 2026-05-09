@@ -21,15 +21,15 @@ export default function AdminNotes({ orderId, initialNotes }: { orderId: string;
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Internal Notes</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide">Internal Notes</h2>
         <div className="flex items-center gap-2">
           {!saved && (
-            <span className="text-xs text-zinc-500">Unsaved changes</span>
+            <span className="text-xs text-warm-gray">Unsaved changes</span>
           )}
           <button
             onClick={save}
             disabled={saving || saved}
-            className="text-xs px-2.5 py-1 rounded bg-zinc-700 text-white hover:bg-zinc-600 transition-colors disabled:opacity-40"
+            className="text-xs px-2.5 py-1 rounded bg-charcoal text-white hover:bg-zinc-800 transition-colors disabled:opacity-40"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -41,9 +41,9 @@ export default function AdminNotes({ orderId, initialNotes }: { orderId: string;
         onBlur={save}
         rows={4}
         placeholder="Add internal notes about this order (only visible to admins)…"
-        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none"
+        className="w-full bg-cream border border-zinc-200 rounded-lg px-3 py-2 text-sm text-charcoal placeholder-warm-gray focus:outline-none focus:border-zinc-400 resize-none"
       />
-      <p className="text-xs text-zinc-600 mt-1.5">Only visible to admins. Saves automatically on blur.</p>
+      <p className="text-xs text-warm-gray mt-1.5">Only visible to admins. Saves automatically on blur.</p>
     </div>
   )
 }

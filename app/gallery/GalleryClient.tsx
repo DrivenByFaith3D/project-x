@@ -112,9 +112,9 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold tracking-widest text-zinc-500 uppercase mb-2">Our Work</p>
-          <h1 className="text-3xl font-bold text-white">Gallery</h1>
-          <p className="text-zinc-400 mt-2">A showcase of prints we've made for our customers.</p>
+          <p className="text-xs font-semibold tracking-widest text-warm-gray uppercase mb-2">Our Work</p>
+          <h1 className="text-3xl font-bold text-charcoal">Gallery</h1>
+          <p className="text-warm-gray mt-2">A showcase of prints we've made for our customers.</p>
         </div>
         {isAdmin && (
           <div>
@@ -145,8 +145,8 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
             onClick={() => setActiveCategory(null)}
             className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
               !activeCategory
-                ? 'border-white text-white bg-white/10'
-                : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+                ? 'border-charcoal text-charcoal bg-charcoal/5'
+                : 'border-taupe/30 text-warm-gray hover:border-charcoal/30 hover:text-charcoal'
             }`}
           >
             All
@@ -157,8 +157,8 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
               onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
               className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                 activeCategory === cat
-                  ? 'border-white text-white bg-white/10'
-                  : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+                  ? 'border-charcoal text-charcoal bg-charcoal/5'
+                  : 'border-taupe/30 text-warm-gray hover:border-charcoal/30 hover:text-charcoal'
               }`}
             >
               {CATEGORY_LABELS[cat] ?? cat}
@@ -169,20 +169,20 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
 
       {filtered.length === 0 ? (
         <div className="card p-16 text-center">
-          <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-14 h-14 rounded-full bg-taupe/10 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-warm-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <p className="text-zinc-400 font-medium mb-1">Gallery coming soon</p>
-          <p className="text-zinc-600 text-sm">
+          <p className="text-warm-gray font-medium mb-1">Gallery coming soon</p>
+          <p className="text-warm-gray text-sm">
             {isAdmin ? 'Click "Add Photo" to upload your first gallery image.' : 'We\'re just getting started — check back soon to see our work.'}
           </p>
         </div>
       ) : (
         <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
           {filtered.map(photo => (
-            <div key={photo.id} className="break-inside-avoid overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 group relative">
+            <div key={photo.id} className="break-inside-avoid overflow-hidden rounded-lg border border-taupe/30 bg-white group relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.url}
@@ -216,14 +216,14 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
               {/* Category badge */}
               {photo.category && (
                 <div className="absolute top-2 left-2 pointer-events-none">
-                  <span className="text-xs bg-black/60 text-zinc-300 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-black/60 text-white px-2 py-0.5 rounded-full">
                     {CATEGORY_LABELS[photo.category] ?? photo.category}
                   </span>
                 </div>
               )}
               {photo.caption && (
                 <div className="px-2 py-1.5">
-                  <p className="text-xs text-zinc-400 truncate">{photo.caption}</p>
+                  <p className="text-xs text-warm-gray truncate">{photo.caption}</p>
                 </div>
               )}
             </div>
@@ -234,8 +234,8 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
       {/* CTA for non-admin users */}
       {!isAdmin && (
         <div className="card p-8 text-center mt-12">
-          <h2 className="text-xl font-bold text-white mb-2">Want something like this?</h2>
-          <p className="text-zinc-400 text-sm mb-5">Submit a custom order and we'll bring your idea to life.</p>
+          <h2 className="text-xl font-bold text-charcoal mb-2">Want something like this?</h2>
+          <p className="text-warm-gray text-sm mb-5">Submit a custom order and we'll bring your idea to life.</p>
           <Link href="/orders/new" className="btn-primary">Start Custom Order</Link>
         </div>
       )}
@@ -244,11 +244,11 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
       {showUploadForm && previewUrl && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => { setShowUploadForm(false); setSelectedFile(null); setPreviewUrl(null) }}>
           <div className="card p-6 w-full max-w-md space-y-4" onClick={e => e.stopPropagation()}>
-            <h2 className="text-white font-semibold text-base">Add to Gallery</h2>
+            <h2 className="text-charcoal font-semibold text-base">Add to Gallery</h2>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewUrl} alt="Preview" className="w-full max-h-48 object-contain rounded-lg border border-zinc-700 bg-zinc-950" />
+            <img src={previewUrl} alt="Preview" className="w-full max-h-48 object-contain rounded-lg border border-taupe/30 bg-cream" />
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Caption <span className="text-zinc-500">(optional)</span></label>
+              <label className="block text-sm font-medium text-charcoal mb-1">Caption <span className="text-warm-gray">(optional)</span></label>
               <input
                 type="text"
                 value={uploadCaption}
@@ -258,7 +258,7 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Category <span className="text-zinc-500">(optional)</span></label>
+              <label className="block text-sm font-medium text-charcoal mb-1">Category <span className="text-warm-gray">(optional)</span></label>
               <select
                 value={uploadCategory}
                 onChange={e => setUploadCategory(e.target.value)}
@@ -289,8 +289,8 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
           <img src={expanded.url} alt={expanded.caption ?? '3D print'} className="max-w-full max-h-[80vh] object-contain rounded-lg" />
           {(expanded.caption || expanded.category) && (
             <div className="mt-4 text-center" onClick={e => e.stopPropagation()}>
-              {expanded.category && <p className="text-zinc-500 text-xs">{CATEGORY_LABELS[expanded.category] ?? expanded.category}</p>}
-              {expanded.caption && <p className="text-zinc-300 text-sm mt-1">{expanded.caption}</p>}
+              {expanded.category && <p className="text-warm-gray text-xs">{CATEGORY_LABELS[expanded.category] ?? expanded.category}</p>}
+              {expanded.caption && <p className="text-white text-sm mt-1">{expanded.caption}</p>}
             </div>
           )}
           <button
@@ -299,7 +299,7 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
           >
             I want this
           </button>
-          <button className="mt-3 text-xs text-zinc-600 hover:text-zinc-400" onClick={() => setExpanded(null)}>Close</button>
+          <button className="mt-3 text-xs text-warm-gray hover:text-white" onClick={() => setExpanded(null)}>Close</button>
         </div>
       )}
 
@@ -309,14 +309,14 @@ export default function GalleryClient({ photos: initialPhotos, isAdmin }: { phot
           <div className="card p-6 w-full max-w-md space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-start gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={inquiryPhoto.url} alt="" className="w-20 h-20 object-cover rounded-lg border border-zinc-700 shrink-0" />
+              <img src={inquiryPhoto.url} alt="" className="w-20 h-20 object-cover rounded-lg border border-taupe/30 shrink-0" />
               <div>
-                <h2 className="text-white font-semibold text-base">Request something like this</h2>
-                <p className="text-zinc-500 text-xs mt-1">We'll review your request and send you a quote.</p>
+                <h2 className="text-charcoal font-semibold text-base">Request something like this</h2>
+                <p className="text-warm-gray text-xs mt-1">We'll review your request and send you a quote.</p>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Tell me more</label>
+              <label className="block text-sm font-medium text-charcoal mb-1">Tell me more</label>
               <textarea
                 value={inquiryText}
                 onChange={e => setInquiryText(e.target.value)}

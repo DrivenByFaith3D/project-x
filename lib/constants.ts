@@ -1,5 +1,5 @@
 export const STATUS_STYLES: Record<string, string> = {
-  pending:          'bg-zinc-800 text-zinc-300',
+  pending:          'bg-zinc-800 text-warm-gray',
   in_progress:      'bg-blue-900/60 text-blue-300',
   label_created:    'bg-yellow-900/60 text-yellow-300',
   in_transit:       'bg-orange-900/60 text-orange-300',

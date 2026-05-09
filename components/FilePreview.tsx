@@ -20,7 +20,7 @@ function ModelViewer({ url, name }: { url: string; name: string }) {
         type="module"
         onLoad={() => setLoaded(true)}
       />
-      <div className="rounded-lg overflow-hidden bg-zinc-900 border border-zinc-700">
+      <div className="rounded-lg overflow-hidden bg-zinc-900 border border-taupe/30">
         {/* @ts-expect-error model-viewer is a custom element */}
         <model-viewer
           src={url}
@@ -40,7 +40,7 @@ function ImagePreview({ url, name }: { url: string; name: string }) {
   return (
     <>
       <div
-        className="rounded-lg overflow-hidden border border-zinc-700 cursor-zoom-in"
+        className="rounded-lg overflow-hidden border border-taupe/30 cursor-zoom-in"
         onClick={() => setExpanded(true)}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -68,8 +68,8 @@ export default function FilePreview({ url, name }: { url: string; name: string }
       <div className="space-y-1.5">
         <ImagePreview url={url} name={displayName} />
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500 truncate">{displayName}</span>
-          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-500 hover:text-white transition-colors shrink-0 ml-2">
+          <span className="text-xs text-warm-gray truncate">{displayName}</span>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-warm-gray hover:text-charcoal transition-colors shrink-0 ml-2">
             Download ↓
           </a>
         </div>
@@ -82,8 +82,8 @@ export default function FilePreview({ url, name }: { url: string; name: string }
       <div className="space-y-1.5">
         <ModelViewer url={url} name={displayName} />
         <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500 truncate">{displayName}</span>
-          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-500 hover:text-white transition-colors shrink-0 ml-2">
+          <span className="text-xs text-warm-gray truncate">{displayName}</span>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-warm-gray hover:text-charcoal transition-colors shrink-0 ml-2">
             Download ↓
           </a>
         </div>
@@ -95,11 +95,11 @@ export default function FilePreview({ url, name }: { url: string; name: string }
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
       className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 transition-colors text-sm">
-      <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-5 h-5 text-warm-gray shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
       </svg>
-      <span className="text-zinc-300 hover:text-white truncate">{displayName}</span>
+      <span className="text-warm-gray hover:text-charcoal truncate">{displayName}</span>
     </a>
   )
 }

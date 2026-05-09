@@ -12,7 +12,7 @@ export default async function Navbar() {
       { label: 'Services', href: '/services-store' },
       { label: 'Shop', href: '/listings' },
       { label: 'About', href: '/about' },
-      { label: 'Contact', href: '/about' },
+      { label: 'Contact', href: '/contact' },
     ] : []),
     ...(isAdmin ? [
       { label: 'Dashboard', href: '/' },

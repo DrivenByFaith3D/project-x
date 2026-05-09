@@ -70,54 +70,54 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
         <form onSubmit={create} className="card p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Code</label>
+              <label className="block text-xs font-medium text-warm-gray mb-1">Code</label>
               <input value={code} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="SAVE10" className="input w-full" required />
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Type</label>
+              <label className="block text-xs font-medium text-warm-gray mb-1">Type</label>
               <select value={type} onChange={e => setType(e.target.value as 'percent' | 'fixed')} className="input w-full">
                 <option value="percent">Percent off (%)</option>
                 <option value="fixed">Fixed amount ($)</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">
+              <label className="block text-xs font-medium text-warm-gray mb-1">
                 {type === 'percent' ? 'Discount (%)' : 'Discount ($)'}
               </label>
               <input type="number" value={value} onChange={e => setValue(e.target.value)} min="0.01" step="0.01" placeholder={type === 'percent' ? '10' : '5.00'} className="input w-full" required />
             </div>
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Max Uses (optional)</label>
+              <label className="block text-xs font-medium text-warm-gray mb-1">Max Uses (optional)</label>
               <input type="number" value={maxUses} onChange={e => setMaxUses(e.target.value)} placeholder="Unlimited" className="input w-full" />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Expiry Date (optional)</label>
+              <label className="block text-xs font-medium text-warm-gray mb-1">Expiry Date (optional)</label>
               <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="input w-full" />
             </div>
-            <div className="col-span-2 border-t border-zinc-800 pt-3">
-              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Conditions (optional)</p>
+            <div className="col-span-2 border-t border-taupe/20 pt-3">
+              <p className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Conditions (optional)</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Min. Quantity</label>
+                  <label className="block text-xs font-medium text-warm-gray mb-1">Min. Quantity</label>
                   <input type="number" value={minQuantity} onChange={e => setMinQuantity(e.target.value)} min="1" step="1" placeholder="e.g. 2" className="input w-full" />
-                  <p className="text-xs text-zinc-600 mt-1">Customer must order at least this many items</p>
+                  <p className="text-xs text-warm-gray/60 mt-1">Customer must order at least this many items</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 mb-1">Min. Order Value ($)</label>
+                  <label className="block text-xs font-medium text-warm-gray mb-1">Min. Order Value ($)</label>
                   <input type="number" value={minOrderValue} onChange={e => setMinOrderValue(e.target.value)} min="0.01" step="0.01" placeholder="e.g. 50.00" className="input w-full" />
-                  <p className="text-xs text-zinc-600 mt-1">Order total must be at least this amount</p>
+                  <p className="text-xs text-warm-gray/60 mt-1">Order total must be at least this amount</p>
                 </div>
               </div>
             </div>
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <button type="submit" disabled={saving} className="btn-primary text-sm">{saving ? 'Creating…' : 'Create Coupon'}</button>
         </form>
       )}
 
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
+          <thead className="bg-taupe/10 text-warm-gray text-xs uppercase tracking-wide">
             <tr>
               <th className="px-5 py-3 text-left">Code</th>
               <th className="px-5 py-3 text-left">Discount</th>
@@ -128,17 +128,17 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
               <th className="px-5 py-3 text-left">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-taupe/10">
             {coupons.length === 0 && (
-              <tr><td colSpan={7} className="px-5 py-10 text-center text-zinc-600">No coupons yet</td></tr>
+              <tr><td colSpan={7} className="px-5 py-10 text-center text-warm-gray">No coupons yet</td></tr>
             )}
             {coupons.map(c => (
               <tr key={c.id}>
-                <td className="px-5 py-3 font-mono font-semibold text-white">{c.code}</td>
-                <td className="px-5 py-3 text-zinc-300">
+                <td className="px-5 py-3 font-mono font-semibold text-charcoal">{c.code}</td>
+                <td className="px-5 py-3 text-warm-gray">
                   {c.type === 'percent' ? `${c.value}% off` : `$${c.value.toFixed(2)} off`}
                 </td>
-                <td className="px-5 py-3 text-zinc-400 text-xs">
+                <td className="px-5 py-3 text-warm-gray text-xs">
                   {c.minQuantity || c.minOrderValue ? (
                     <div className="space-y-0.5">
                       {c.minQuantity && <div>Min qty: {c.minQuantity}</div>}
@@ -146,23 +146,23 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                     </div>
                   ) : '—'}
                 </td>
-                <td className="px-5 py-3 text-zinc-400">
+                <td className="px-5 py-3 text-warm-gray">
                   {c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''}
                 </td>
-                <td className="px-5 py-3 text-zinc-400">
+                <td className="px-5 py-3 text-warm-gray">
                   {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : '—'}
                 </td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.active ? 'bg-green-900/40 text-green-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.active ? 'bg-green-100 text-green-700' : 'bg-taupe/20 text-warm-gray'}`}>
                     {c.active ? 'Active' : 'Disabled'}
                   </span>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggle(c.id, !c.active)} className="text-xs text-zinc-400 hover:text-white transition-colors">
+                    <button onClick={() => toggle(c.id, !c.active)} className="text-xs text-warm-gray hover:text-charcoal transition-colors">
                       {c.active ? 'Disable' : 'Enable'}
                     </button>
-                    <button onClick={() => remove(c.id)} className="text-xs text-red-500 hover:text-red-400 transition-colors">Delete</button>
+                    <button onClick={() => remove(c.id)} className="text-xs text-red-600 hover:text-red-700 transition-colors">Delete</button>
                   </div>
                 </td>
               </tr>

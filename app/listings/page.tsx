@@ -24,7 +24,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
 
       <div className="mb-8">
         <h1 className="text-3xl font-display">Our Shop</h1>
-        <p className="text-charcoal/60 mt-2">Browse our catalog of ready-made 3D printed products.</p>
+        <p className="text-charcoal/85 mt-2">Browse our catalog of ready-made 3D printed products.</p>
       </div>
 
       {products.length === 0 ? (

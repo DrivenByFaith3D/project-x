@@ -51,7 +51,7 @@ export default function PayPage() {
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="card p-8 w-full max-w-sm text-center space-y-4">
         <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-zinc-400 text-sm">Redirecting to checkout…</p>
+        <p className="text-warm-gray text-sm">Redirecting to checkout…</p>
       </div>
     </div>
   )

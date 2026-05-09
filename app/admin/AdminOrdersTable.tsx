@@ -95,7 +95,7 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
 
   const dimField = (label: string, key: keyof typeof dims, opts?: { min?: string; step?: string }) => (
     <div>
-      <label className="block text-sm font-medium text-zinc-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-warm-gray mb-1">{label}</label>
       <input className="input w-full" value={dims[key]} onChange={setDim(key)} type="number" min={opts?.min ?? '0'} step={opts?.step ?? '1'} required />
     </div>
   )
@@ -109,21 +109,21 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-full bg-taupe/20 border border-taupe/30 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-warm-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-charcoal">
               {step === 'form' ? 'Create Shipping Label' : step === 'rates' ? 'Choose a Carrier' : 'Label Ready'}
             </h1>
-            <p className="text-zinc-400 mt-1 text-sm">
+            <p className="text-warm-gray mt-1 text-sm">
               {step === 'form' ? 'Enter the package dimensions' : step === 'rates' ? 'Select the rate that works best for you' : 'Your label has been purchased'}
             </p>
             <div className="flex items-center justify-center gap-2 mt-4">
-              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'form' ? 'bg-white' : 'bg-zinc-700'}`} />
-              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'rates' ? 'bg-white' : 'bg-zinc-700'}`} />
-              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'done' ? 'bg-green-400' : 'bg-zinc-700'}`} />
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'form' ? 'bg-charcoal' : 'bg-charcoal/20'}`} />
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'rates' ? 'bg-charcoal' : 'bg-charcoal/20'}`} />
+              <div className={`h-1.5 w-8 rounded-full transition-colors ${step === 'done' ? 'bg-green-600' : 'bg-charcoal/20'}`} />
             </div>
           </div>
 
@@ -131,54 +131,54 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
             <form onSubmit={fetchRates} className="space-y-5">
 
               {/* Address summary */}
-              <div className="rounded-lg border border-zinc-800 bg-zinc-800/40 p-4 space-y-3 text-sm">
+              <div className="rounded-lg border border-taupe/30 bg-taupe/10 p-4 space-y-3 text-sm">
                 <div className="flex gap-3">
-                  <span className="text-zinc-500 w-10 shrink-0">From</span>
-                  <span className="text-zinc-300">{FROM.street}, {FROM.city}, {FROM.state} {FROM.zip}</span>
+                  <span className="text-warm-gray w-10 shrink-0">From</span>
+                  <span className="text-charcoal/85">{FROM.street}, {FROM.city}, {FROM.state} {FROM.zip}</span>
                 </div>
-                <div className="border-t border-zinc-800" />
+                <div className="border-t border-taupe/30" />
                 <div className="flex gap-3">
-                  <span className="text-zinc-500 w-10 shrink-0">To</span>
+                  <span className="text-warm-gray w-10 shrink-0">To</span>
                   {hasToAddress ? (
-                    <span className="text-zinc-300">
+                    <span className="text-charcoal/85">
                       {toAddress.street}, {toAddress.city}, {toAddress.state} {toAddress.zip}
                     </span>
                   ) : (
-                    <span className="text-amber-400 text-xs">No address on file for this customer</span>
+                    <span className="text-amber-600 text-xs">No address on file for this customer</span>
                   )}
                 </div>
               </div>
 
               {/* Dimensions */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">Package Dimensions</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-warm-gray mb-3">Package Dimensions</p>
                 <div className="grid grid-cols-2 gap-3">
                   {dimField('Length (in)', 'length', { min: '0.1', step: '0.1' })}
                   {dimField('Width (in)', 'width', { min: '0.1', step: '0.1' })}
                   {dimField('Height (in)', 'height', { min: '0.1', step: '0.1' })}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-1">Weight</label>
-                    <div className="flex rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 focus-within:border-zinc-500">
+                    <label className="block text-sm font-medium text-warm-gray mb-1">Weight</label>
+                    <div className="flex rounded-lg overflow-hidden border border-taupe/30 bg-cream focus-within:border-charcoal/50">
                       <div className="relative flex-1">
-                        <input className="w-full bg-transparent px-3 py-2 text-sm text-white focus:outline-none" value={dims.weightLb} onChange={setDim('weightLb')} type="number" min="0" step="1" placeholder="0" required />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-500 pointer-events-none">lb</span>
+                        <input className="w-full bg-transparent px-3 py-2 text-sm text-charcoal focus:outline-none" value={dims.weightLb} onChange={setDim('weightLb')} type="number" min="0" step="1" placeholder="0" required />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-warm-gray pointer-events-none">lb</span>
                       </div>
-                      <div className="w-px bg-zinc-700" />
+                      <div className="w-px bg-taupe/30" />
                       <div className="relative flex-1">
-                        <input className="w-full bg-transparent px-3 py-2 text-sm text-white focus:outline-none" value={dims.weightOz} onChange={setDim('weightOz')} type="number" min="0" max="15" step="1" placeholder="0" required />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-500 pointer-events-none">oz</span>
+                        <input className="w-full bg-transparent px-3 py-2 text-sm text-charcoal focus:outline-none" value={dims.weightOz} onChange={setDim('weightOz')} type="number" min="0" max="15" step="1" placeholder="0" required />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-warm-gray pointer-events-none">oz</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>}
+              {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
 
               <button type="submit" disabled={loading || !hasToAddress} className="btn-primary w-full">
                 {loading ? 'Fetching rates…' : 'Get Shipping Rates'}
               </button>
-              <button type="button" onClick={onClose} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              <button type="button" onClick={onClose} className="w-full text-center text-sm text-warm-gray hover:text-charcoal transition-colors">
                 Cancel
               </button>
             </form>
@@ -193,20 +193,20 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
                   onClick={() => setSelectedRate(rate)}
                   className={`w-full flex items-center justify-between px-4 py-4 rounded-lg border text-left transition-all ${
                     selectedRate?.id === rate.id
-                      ? 'border-zinc-400 bg-zinc-800 text-white'
-                      : 'border-zinc-800 bg-zinc-800/40 text-zinc-300 hover:border-zinc-600'
+                      ? 'border-charcoal bg-taupe/20 text-charcoal'
+                      : 'border-taupe/30 bg-taupe/5 text-warm-gray hover:border-taupe/50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-colors ${
-                      selectedRate?.id === rate.id ? 'border-white bg-white' : 'border-zinc-600'
+                      selectedRate?.id === rate.id ? 'border-charcoal bg-charcoal' : 'border-taupe/50'
                     }`} />
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">{rate.carrier}</span>
-                        {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-900/50 text-green-400 border border-green-800/50 rounded-full">Best price</span>}
+                        {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-100 text-green-700 border border-green-200 rounded-full">Best price</span>}
                       </div>
-                      <p className="text-zinc-400 text-xs mt-0.5">
+                      <p className="text-warm-gray text-xs mt-0.5">
                         {rate.service}{rate.estimatedDays > 0 ? ` · ${rate.estimatedDays} day${rate.estimatedDays !== 1 ? 's' : ''}` : ''}
                       </p>
                     </div>
@@ -215,12 +215,12 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
                 </button>
               ))}
 
-              {error && <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2 mt-2">{error}</p>}
+              {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-2">{error}</p>}
 
               <button type="button" onClick={purchaseLabel} disabled={loading || !selectedRate} className="btn-primary w-full mt-4">
                 {loading ? 'Purchasing label…' : 'Buy Label & Mark Shipped'}
               </button>
-              <button type="button" onClick={() => { setStep('form'); setError('') }} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              <button type="button" onClick={() => { setStep('form'); setError('') }} className="w-full text-center text-sm text-warm-gray hover:text-charcoal transition-colors">
                 ← Back to details
               </button>
             </div>
@@ -228,14 +228,14 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
 
           {step === 'done' && (
             <div className="space-y-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-green-900/50 border border-green-800/50 flex items-center justify-center mx-auto">
-                <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-12 h-12 rounded-full bg-green-100 border border-green-200 flex items-center justify-center mx-auto">
+                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <p className="text-white font-semibold">Label Created</p>
-                <p className="text-zinc-400 text-sm mt-1">The label PDF should have opened in a new tab.</p>
+                <p className="text-charcoal font-semibold">Label Created</p>
+                <p className="text-warm-gray text-sm mt-1">The label PDF should have opened in a new tab.</p>
               </div>
               {labelUrl && (
                 <a href={labelUrl} target="_blank" rel="noopener noreferrer" className="btn-primary w-full flex items-center justify-center gap-2">
@@ -245,7 +245,7 @@ function ShipModal({ orderId, toAddress, onClose, onShipped }: { orderId: string
                   Download Label
                 </a>
               )}
-              <button type="button" onClick={onClose} className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              <button type="button" onClick={onClose} className="w-full text-center text-sm text-warm-gray hover:text-charcoal transition-colors">
                 Close
               </button>
             </div>
@@ -314,18 +314,18 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
 
   return (
     <>
-      <tr className={`hover:bg-zinc-800/50 transition-colors ${selected ? 'bg-zinc-800/30' : ''}`}>
+      <tr className={`hover:bg-taupe/5 transition-colors ${selected ? 'bg-taupe/10' : ''}`}>
         <td className="pl-5 pr-2 py-4">
           <input
             type="checkbox"
             checked={selected}
             onChange={onToggle}
-            className="accent-blue-600 cursor-pointer"
+            className="accent-charcoal cursor-pointer"
           />
         </td>
         <td className="px-3 py-4">
           <div className="flex items-center gap-2">
-            <Link href={`/admin/orders/${order.id}`} className="text-zinc-300 hover:text-white font-mono">
+            <Link href={`/admin/orders/${order.id}`} className="text-charcoal/80 hover:text-charcoal font-mono">
               {formatOrderId(order)}
             </Link>
             {unread > 0 && (
@@ -335,13 +335,13 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
             )}
           </div>
         </td>
-        <td className="px-5 py-4 text-zinc-400">{order.userEmail}</td>
+        <td className="px-5 py-4 text-warm-gray">{order.userEmail}</td>
         <td className="px-5 py-4">
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[status] ?? 'bg-zinc-800 text-zinc-300'}`}>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[status] ?? 'bg-taupe/20 text-warm-gray'}`}>
             {STATUS_LABELS[status] ?? status}
           </span>
         </td>
-        <td className="px-5 py-4 text-zinc-500">
+        <td className="px-5 py-4 text-warm-gray">
           {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </td>
         <td className="px-5 py-4">
@@ -350,23 +350,23 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
               <div className="flex items-center gap-2 flex-wrap">
                 <select value={status} onChange={(e) => updateStatus(e.target.value as OrderStatus)}
                   disabled={busy}
-                  className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
+                  className="text-xs bg-white border border-taupe/30 text-charcoal rounded-lg px-2 py-1 focus:outline-none disabled:opacity-50">
                   {STATUSES.map((s) => (
                   <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
                 ))}
                 </select>
                 <button onClick={() => setShowShipModal(true)} disabled={busy}
-                  className="text-xs text-zinc-500 hover:text-blue-400 transition-colors px-1.5 py-1 rounded hover:bg-blue-400/10 disabled:opacity-40"
+                  className="text-xs text-warm-gray hover:text-blue-600 transition-colors px-1.5 py-1 rounded hover:bg-blue-50 disabled:opacity-40"
                   title="Create shipping label">
                   Ship Label
                 </button>
                 <button onClick={() => doAction('archive')} disabled={busy}
-                  className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40"
+                  className="text-xs text-warm-gray hover:text-amber-600 transition-colors px-1.5 py-1 rounded hover:bg-amber-50 disabled:opacity-40"
                   title="Archive">
                   Archive
                 </button>
                 <button onClick={() => doAction('delete')} disabled={busy}
-                  className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-1.5 py-1 rounded hover:bg-red-400/10 disabled:opacity-40"
+                  className="text-xs text-warm-gray hover:text-red-600 transition-colors px-1.5 py-1 rounded hover:bg-red-50 disabled:opacity-40"
                   title="Move to trash">
                   Delete
                 </button>
@@ -374,35 +374,35 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
               {/* Quote row */}
               {showQuoteInput ? (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-zinc-500">$</span>
+                  <span className="text-xs text-warm-gray">$</span>
                   <input
                     type="number"
                     min="0.01"
                     step="0.01"
                     value={quoteValue}
                     onChange={(e) => setQuoteValue(e.target.value)}
-                    className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded px-2 py-1 w-20 focus:outline-none focus:border-zinc-500"
+                    className="text-xs bg-white border border-taupe/30 text-charcoal rounded px-2 py-1 w-20 focus:outline-none focus:border-charcoal/50"
                     placeholder="0.00"
                     autoFocus
                   />
                   <button onClick={saveQuote} disabled={busy}
-                    className="text-xs text-green-400 hover:text-green-300 px-1.5 py-1 rounded hover:bg-green-400/10 disabled:opacity-40">
+                    className="text-xs text-green-600 hover:text-green-700 px-1.5 py-1 rounded hover:bg-green-50 disabled:opacity-40">
                     Save
                   </button>
                   <button onClick={() => setShowQuoteInput(false)}
-                    className="text-xs text-zinc-500 hover:text-zinc-300 px-1.5 py-1 rounded hover:bg-zinc-700">
+                    className="text-xs text-warm-gray hover:text-charcoal px-1.5 py-1 rounded hover:bg-taupe/10">
                     Cancel
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   {quote ? (
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${paymentStatus === 'paid' ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {paymentStatus === 'paid' ? `Paid $${quote.toFixed(2)}` : `Quote: $${quote.toFixed(2)} — Unpaid`}
                     </span>
                   ) : null}
                   <button onClick={() => setShowQuoteInput(true)} disabled={busy}
-                    className="text-xs text-zinc-500 hover:text-green-400 transition-colors px-1.5 py-1 rounded hover:bg-green-400/10 disabled:opacity-40">
+                    className="text-xs text-warm-gray hover:text-green-600 transition-colors px-1.5 py-1 rounded hover:bg-green-50 disabled:opacity-40">
                     {quote ? 'Edit Quote' : 'Set Quote'}
                   </button>
                 </div>
@@ -412,28 +412,28 @@ function OrderRow({ order, tab, unread, selected, onToggle, onAction }: { order:
           {tab === 'delivered' && (
             <div className="flex items-center gap-2">
               <button onClick={() => doAction('archive')} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-amber-400 transition-colors px-1.5 py-1 rounded hover:bg-amber-400/10 disabled:opacity-40">
+                className="text-xs text-warm-gray hover:text-amber-600 transition-colors px-1.5 py-1 rounded hover:bg-amber-50 disabled:opacity-40">
                 Archive
               </button>
               <button onClick={() => doAction('delete')} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-red-400 transition-colors px-1.5 py-1 rounded hover:bg-red-400/10 disabled:opacity-40">
+                className="text-xs text-warm-gray hover:text-red-600 transition-colors px-1.5 py-1 rounded hover:bg-red-50 disabled:opacity-40">
                 Delete
               </button>
             </div>
           )}
           {tab === 'archived' && (
             <button onClick={() => doAction('restore')} disabled={busy}
-              className="text-xs text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500 disabled:opacity-40">
+              className="text-xs text-warm-gray hover:text-charcoal transition-colors px-2 py-1 rounded border border-taupe/30 hover:border-taupe/50 disabled:opacity-40">
               Restore
             </button>
           )}
           {tab === 'trash' && (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-zinc-600">
+              <span className="text-xs text-warm-gray/60">
                 {daysLeft === 0 ? 'Deletes today' : `${daysLeft}d left`}
               </span>
               <button onClick={() => doAction('restore')} disabled={busy}
-                className="text-xs text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500 disabled:opacity-40">
+                className="text-xs text-warm-gray hover:text-charcoal transition-colors px-2 py-1 rounded border border-taupe/30 hover:border-taupe/50 disabled:opacity-40">
                 Restore
               </button>
             </div>
@@ -566,29 +566,29 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
   const bulkActions: { label: string; action: 'archive' | 'delete' | 'restore'; className: string }[] =
     tab === 'active' || tab === 'delivered'
       ? [
-          { label: 'Archive', action: 'archive', className: 'text-amber-400 hover:bg-amber-400/10' },
-          { label: 'Move to Trash', action: 'delete', className: 'text-red-400 hover:bg-red-400/10' },
+          { label: 'Archive', action: 'archive', className: 'text-amber-600 hover:bg-amber-600/10' },
+          { label: 'Move to Trash', action: 'delete', className: 'text-red-600 hover:bg-red-600/10' },
         ]
       : tab === 'archived'
       ? [
-          { label: 'Restore', action: 'restore', className: 'text-white hover:bg-zinc-700' },
-          { label: 'Move to Trash', action: 'delete', className: 'text-red-400 hover:bg-red-400/10' },
+          { label: 'Restore', action: 'restore', className: 'bg-charcoal text-white hover:bg-charcoal/90' },
+          { label: 'Move to Trash', action: 'delete', className: 'text-red-600 hover:bg-red-600/10' },
         ]
       : [
-          { label: 'Restore', action: 'restore', className: 'text-white hover:bg-zinc-700' },
+          { label: 'Restore', action: 'restore', className: 'bg-charcoal text-white hover:bg-charcoal/90' },
         ]
 
   return (
     <div className="card overflow-hidden">
       {/* Header with tabs and search */}
-      <div className="px-5 py-4 border-b border-zinc-800 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="px-5 py-4 border-b border-taupe/20 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => switchTab(t.id)}
               className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
-                tab === t.id ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                tab === t.id ? 'bg-charcoal text-white' : 'text-warm-gray hover:text-charcoal'
               }`}
             >
               {t.label}
@@ -598,7 +598,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                 </span>
               )}
               {t.count > 0 && (t.unread ?? 0) === 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === t.id ? 'bg-zinc-600 text-zinc-200' : 'bg-zinc-800 text-zinc-500'}`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === t.id ? 'bg-charcoal/80 text-white' : 'bg-taupe/20 text-warm-gray'}`}>
                   {t.count}
                 </span>
               )}
@@ -606,7 +606,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
           ))}
         </div>
         <div className="relative">
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-warm-gray pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -614,23 +614,23 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
             placeholder="Search orders…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="text-xs bg-zinc-800 border border-zinc-700 text-white rounded-lg pl-7 pr-3 py-1.5 w-48 focus:outline-none focus:border-zinc-500 placeholder-zinc-600"
+            className="text-xs bg-white border border-taupe/30 text-charcoal rounded-lg pl-7 pr-3 py-1.5 w-48 focus:outline-none focus:border-charcoal/50 placeholder-warm-gray/50"
           />
         </div>
       </div>
 
       {/* Bulk action bar */}
       {someSelected && (
-        <div className="px-5 py-2.5 bg-zinc-800/60 border-b border-zinc-700 flex items-center gap-3 flex-wrap">
-          <span className="text-xs text-zinc-300 font-medium">{selectedInView} selected</span>
+        <div className="px-5 py-2.5 bg-taupe/10 border-b border-taupe/20 flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-charcoal/85 font-medium">{selectedInView} selected</span>
           <div className="flex items-center gap-1 flex-wrap">
             {tab === 'active' && (
-              <div className="flex items-center gap-1 border-r border-zinc-700 pr-2 mr-1">
+              <div className="flex items-center gap-1 border-r border-taupe/30 pr-2 mr-1">
                 <select
                   value={bulkStatus}
                   onChange={(e) => setBulkStatus(e.target.value as OrderStatus)}
                   disabled={bulkBusy}
-                  className="text-xs bg-zinc-900 border border-zinc-700 text-white rounded px-1.5 py-1 focus:outline-none disabled:opacity-50"
+                  className="text-xs bg-white border border-taupe/30 text-charcoal rounded px-1.5 py-1 focus:outline-none disabled:opacity-50"
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
@@ -639,7 +639,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                 <button
                   onClick={bulkStatusUpdate}
                   disabled={bulkBusy}
-                  className="text-xs px-2.5 py-1 rounded bg-zinc-700 text-white hover:bg-zinc-600 transition-colors disabled:opacity-40"
+                  className="text-xs px-2.5 py-1 rounded bg-charcoal text-white hover:bg-charcoal/90 transition-colors disabled:opacity-40"
                 >
                   Set Status
                 </button>
@@ -658,7 +658,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
           </div>
           <button
             onClick={() => setSelected(new Set())}
-            className="ml-auto text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="ml-auto text-xs text-warm-gray hover:text-charcoal transition-colors"
           >
             Clear
           </button>
@@ -666,26 +666,26 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
       )}
 
       {tab === 'trash' && trash.length > 0 && !someSelected && (
-        <div className="px-5 py-2.5 bg-red-950/30 border-b border-red-900/40 text-xs text-red-400">
+        <div className="px-5 py-2.5 bg-red-50 border-b border-red-100 text-xs text-red-600">
           Orders in trash are permanently deleted after 30 days.
         </div>
       )}
 
       {tab === 'delivered' && !someSelected && (
-        <div className="px-5 py-2.5 bg-green-950/30 border-b border-green-900/40 text-xs text-green-400">
+        <div className="px-5 py-2.5 bg-green-50 border-b border-green-100 text-xs text-green-600">
           Orders that have been delivered to the customer.
         </div>
       )}
 
       {tab === 'archived' && !someSelected && (
-        <div className="px-5 py-2.5 bg-amber-950/30 border-b border-amber-900/40 text-xs text-amber-400">
+        <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-100 text-xs text-amber-600">
           Archived orders are kept permanently and can be restored at any time.
         </div>
       )}
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
+          <thead className="bg-taupe/10 text-warm-gray text-xs uppercase tracking-wide">
             <tr>
               <th className="pl-5 pr-2 py-3">
                 <input
@@ -693,7 +693,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                   checked={allSelected}
                   ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected }}
                   onChange={toggleAll}
-                  className="accent-blue-600 cursor-pointer"
+                  className="accent-charcoal cursor-pointer"
                   title={allSelected ? 'Deselect all' : 'Select all'}
                 />
               </th>
@@ -704,7 +704,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
               <th className="px-5 py-3 text-left">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-taupe/10">
             {rows.map((order) => (
               <OrderRow
                 key={order.id}
@@ -718,7 +718,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-10 text-center text-zinc-600">
+                <td colSpan={6} className="px-5 py-10 text-center text-warm-gray">
                   {tab === 'active' ? 'No active orders' : tab === 'delivered' ? 'No delivered orders' : tab === 'archived' ? 'No archived orders' : 'Trash is empty'}
                 </td>
               </tr>
@@ -729,7 +729,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-5 py-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
+        <div className="px-5 py-3 border-t border-taupe/20 flex items-center justify-between text-xs text-warm-gray">
           <span>
             {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredRows.length)} of {filteredRows.length}
           </span>
@@ -737,7 +737,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+              className="px-2 py-1 rounded hover:bg-taupe/10 disabled:opacity-30 transition-colors"
             >
               ←
             </button>
@@ -755,7 +755,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
                   <button
                     key={p}
                     onClick={() => setPage(p as number)}
-                    className={`w-7 h-7 rounded transition-colors ${safePage === p ? 'bg-zinc-700 text-white' : 'hover:bg-zinc-800'}`}
+                    className={`w-7 h-7 rounded transition-colors ${safePage === p ? 'bg-charcoal text-white' : 'hover:bg-taupe/10'}`}
                   >
                     {p}
                   </button>
@@ -764,7 +764,7 @@ export default function AdminOrdersTable({ initialOrders, unreadMap = {} }: { in
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="px-2 py-1 rounded hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+              className="px-2 py-1 rounded hover:bg-taupe/10 disabled:opacity-30 transition-colors"
             >
               →
             </button>

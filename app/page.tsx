@@ -226,7 +226,7 @@ export default async function HomePage() {
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display leading-tight mb-6">
           Precision Prints,<br />Made to Order
         </h1>
-        <p className="text-charcoal/70 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
+        <p className="text-charcoal/85 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
           We specialize in high-quality 3D printed desk organizers. Every print is crafted with care, priced per print hour, so you only pay for exactly what&apos;s made.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
@@ -250,7 +250,7 @@ export default async function HomePage() {
             ].map((f) => (
               <div key={f.title}>
                 <h3 className="text-xl font-display mb-2">{f.title}</h3>
-                <p className="text-charcoal/60 text-sm leading-relaxed">{f.desc}</p>
+                <p className="text-charcoal/80 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>

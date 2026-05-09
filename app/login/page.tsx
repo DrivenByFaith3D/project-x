@@ -73,13 +73,13 @@ export default function LoginPage() {
           <Image src="/logo.png" alt="DrivenByFaith3D" width={64} height={64} className="mx-auto mb-4 object-contain" />
           {showForgot ? (
             <>
-              <h1 className="text-2xl font-bold text-white">Forgot password?</h1>
-              <p className="text-zinc-400 mt-1 text-sm">Enter the email and name on your account</p>
+              <h1 className="text-2xl font-bold text-charcoal">Forgot password?</h1>
+              <p className="text-warm-gray mt-1 text-sm">Enter the email and name on your account</p>
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-              <p className="text-zinc-400 mt-1 text-sm">Sign in to your account</p>
+              <h1 className="text-2xl font-bold text-charcoal">Welcome back</h1>
+              <p className="text-warm-gray mt-1 text-sm">Sign in to your account</p>
             </>
           )}
         </div>
@@ -88,17 +88,17 @@ export default function LoginPage() {
           <>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
+                <label className="block text-sm font-medium text-charcoal mb-1">Email</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   className="input" placeholder="you@example.com" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1">Password</label>
+                <label className="block text-sm font-medium text-charcoal mb-1">Password</label>
                 <PasswordInput value={password} onChange={setPassword} required />
               </div>
 
               {error && (
-                <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{error}</p>
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
               )}
 
               <button type="submit" disabled={loading} className="btn-primary w-full">
@@ -108,26 +108,26 @@ export default function LoginPage() {
 
             <button
               onClick={() => { setShowForgot(true); setResetEmail(email) }}
-              className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors mt-4"
+              className="w-full text-center text-sm text-warm-gray hover:text-charcoal transition-colors mt-4"
             >
               Forgot your password?
             </button>
 
-            <p className="text-center text-sm text-zinc-500 mt-4">
+            <p className="text-center text-sm text-warm-gray mt-4">
               Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-white font-medium hover:underline">Sign up</Link>
+              <Link href="/signup" className="text-charcoal font-medium hover:underline">Sign up</Link>
             </p>
           </>
         ) : resetDone ? (
           <div className="text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-full bg-taupe/10 flex items-center justify-center mx-auto">
+              <svg className="w-6 h-6 text-charcoal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-white font-medium">Check your email</p>
-            <p className="text-sm text-zinc-400">
-              If an account exists for <strong className="text-white">{resetEmail}</strong>, we've sent a password reset link. Check your inbox — it expires in 1 hour.
+            <p className="text-charcoal font-medium">Check your email</p>
+            <p className="text-sm text-warm-gray">
+              If an account exists for <strong className="text-charcoal">{resetEmail}</strong>, we've sent a password reset link. Check your inbox — it expires in 1 hour.
             </p>
             <button onClick={() => { setShowForgot(false); setResetDone(false) }}
               className="btn-secondary w-full mt-2">
@@ -138,13 +138,13 @@ export default function LoginPage() {
           <>
             <form onSubmit={handleResetRequest} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
+                <label className="block text-sm font-medium text-charcoal mb-1">Email</label>
                 <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
                   className="input" placeholder="you@example.com" required />
               </div>
 
               {resetError && (
-                <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">{resetError}</p>
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{resetError}</p>
               )}
 
               <button type="submit" disabled={resetLoading} className="btn-primary w-full">
@@ -153,7 +153,7 @@ export default function LoginPage() {
             </form>
 
             <button onClick={() => setShowForgot(false)}
-              className="w-full text-center text-sm text-zinc-500 hover:text-zinc-300 transition-colors mt-4">
+              className="w-full text-center text-sm text-warm-gray hover:text-charcoal transition-colors mt-4">
               Back to sign in
             </button>
           </>

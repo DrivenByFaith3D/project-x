@@ -88,7 +88,7 @@ export default function CartDrawer() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-charcoal truncate">{item.name}</p>
-                        <p className="text-sm text-charcoal/70">${item.price.toFixed(2)}</p>
+                        <p className="text-sm text-charcoal/90">${item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-2 mt-1.5">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -123,7 +123,7 @@ export default function CartDrawer() {
             {items.length > 0 && (
               <div className="border-t border-taupe/30 px-6 py-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-charcoal/70">Subtotal</span>
+                  <span className="text-sm text-charcoal/90">Subtotal</span>
                   <span className="text-lg font-display">${totalPrice.toFixed(2)}</span>
                 </div>
                 <button

@@ -16,12 +16,12 @@ export default function OrderPhotos({ photos }: { photos: Photo[] }) {
   return (
     <>
       <div className="card p-5 mb-6">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Your Print</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Your Print</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="aspect-square rounded-lg overflow-hidden border border-zinc-700 cursor-zoom-in"
+              className="aspect-square rounded-lg overflow-hidden border border-taupe/30 cursor-zoom-in"
               onClick={() => setExpanded(photo.url)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

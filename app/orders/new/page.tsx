@@ -119,7 +119,7 @@ export default function NewOrderPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10 text-center">
           <h1 className="text-2xl font-display">Start a Custom Order</h1>
-          <p className="text-charcoal/60 text-sm mt-2">What kind of service are you looking for?</p>
+          <p className="text-charcoal/85 text-sm mt-2">What kind of service are you looking for?</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {(Object.entries(SERVICES) as [ServiceType & string, typeof SERVICES['customize']][]).map(([id, service]) => (
@@ -130,7 +130,7 @@ export default function NewOrderPage() {
             >
               <div>
                 <h2 className="font-display text-xl mb-1">{service.title}</h2>
-                <p className="text-charcoal/60 text-sm leading-relaxed">{service.description}</p>
+                <p className="text-charcoal/85 text-sm leading-relaxed">{service.description}</p>
               </div>
               <div className="border-t border-taupe/30 pt-3 mt-auto">
                 <span className="text-sm font-medium text-charcoal">{service.rate}</span>
@@ -155,7 +155,7 @@ export default function NewOrderPage() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-display">{selectedService?.title}</h1>
-        <p className="text-charcoal/60 text-sm mt-1">{selectedService?.description}</p>
+        <p className="text-charcoal/85 text-sm mt-1">{selectedService?.description}</p>
         <span className="inline-block mt-2 text-sm font-medium text-charcoal bg-taupe/30 px-3 py-1 rounded-full">
           {selectedService?.rate}
         </span>
@@ -213,7 +213,7 @@ export default function NewOrderPage() {
             >
               {file ? (
                 <div className="flex items-center justify-center gap-3">
-                  <svg className="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-charcoal/85" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-sm text-charcoal truncate max-w-xs">{file.name}</span>
@@ -225,7 +225,7 @@ export default function NewOrderPage() {
                   <svg className="w-8 h-8 mx-auto mb-2 text-warm-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
-                  <p className="text-sm text-charcoal/60">Click to upload</p>
+                  <p className="text-sm text-charcoal/85">Click to upload</p>
                   <p className="text-xs text-warm-gray mt-1">Images up to 50MB</p>
                 </>
               )}

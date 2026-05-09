@@ -66,7 +66,7 @@ export default function CouponInput({ price, quantity = 1, onApply }: {
               )}
             </span>
           </div>
-          <button onClick={remove} className="text-xs text-zinc-500 hover:text-white transition-colors">Remove</button>
+          <button onClick={remove} className="text-xs text-warm-gray hover:text-charcoal transition-colors">Remove</button>
         </div>
       ) : (
         <div className="flex gap-2">

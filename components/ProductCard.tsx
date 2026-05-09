@@ -52,7 +52,7 @@ export default function ProductCard({ product, avgRating, reviewCount, isLoggedI
       <div className="p-4 flex flex-col flex-1">
         <h3 className="font-semibold text-charcoal">{product.name}</h3>
         {product.description && (
-          <p className="text-sm text-charcoal/60 mt-1 line-clamp-2 flex-1">{product.description}</p>
+          <p className="text-sm text-charcoal/85 mt-1 line-clamp-2 flex-1">{product.description}</p>
         )}
         {avgRating != null && reviewCount ? (
           <div className="flex items-center gap-1.5 mt-2">

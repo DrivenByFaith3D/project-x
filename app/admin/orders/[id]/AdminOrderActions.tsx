@@ -69,7 +69,7 @@ export default function AdminOrderActions({
     <div className="space-y-4">
       {/* Status */}
       <div className="card p-5">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Status</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Status</h2>
         <select
           value={status}
           onChange={(e) => updateStatus(e.target.value as OrderStatus)}
@@ -84,19 +84,19 @@ export default function AdminOrderActions({
 
       {/* Quote */}
       <div className="card p-5">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Quote</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Quote</h2>
         {quote ? (
           <div className="mb-3">
-            <p className={`text-sm font-medium ${paymentStatus === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
+            <p className={`text-sm font-medium ${paymentStatus === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
               ${quote.toFixed(2)} — {paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-zinc-500 mb-3">No quote set yet.</p>
+          <p className="text-sm text-warm-gray mb-3">No quote set yet.</p>
         )}
         {showQuoteInput ? (
           <div className="flex items-center gap-2">
-            <span className="text-zinc-400 text-sm">$</span>
+            <span className="text-warm-gray text-sm">$</span>
             <input
               type="number"
               min="0.01"
@@ -127,16 +127,16 @@ export default function AdminOrderActions({
 
       {/* Shipping */}
       <div className="card p-5">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Shipping</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Shipping</h2>
         <div className="mb-3 text-sm">
           {defaultAddress ? (
-            <div className="bg-zinc-800/50 rounded-lg px-3 py-2.5 text-zinc-300 leading-relaxed">
+            <div className="bg-taupe/10 rounded-lg px-3 py-2.5 text-charcoal/85 leading-relaxed">
               <p>{defaultAddress.street}</p>
               <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.zip}</p>
-              <p className="text-zinc-500 text-xs mt-0.5">{defaultAddress.country}</p>
+              <p className="text-warm-gray text-xs mt-0.5">{defaultAddress.country}</p>
             </div>
           ) : (
-            <p className="text-zinc-500 text-xs">No address on file for this customer.</p>
+            <p className="text-warm-gray text-xs">No address on file for this customer.</p>
           )}
         </div>
         <div className="flex flex-col gap-2">

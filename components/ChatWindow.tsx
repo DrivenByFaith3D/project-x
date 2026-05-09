@@ -131,10 +131,10 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
 
   return (
     <div className="card flex flex-col" style={{ height: '600px' }}>
-      <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-        <h2 className="font-semibold text-white">Chat</h2>
+      <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
+        <h2 className="font-semibold text-charcoal">Chat</h2>
         <button onClick={() => setShowUploader((v) => !v)}
-          className="text-sm text-zinc-400 hover:text-white font-medium flex items-center gap-1 transition-colors">
+          className="text-sm text-warm-gray hover:text-charcoal font-medium flex items-center gap-1 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -144,7 +144,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
       </div>
 
       {showUploader && (
-        <div className="px-5 py-3 border-b border-zinc-800 bg-zinc-950">
+        <div className="px-5 py-3 border-b border-zinc-200 bg-cream">
           <FileUploader orderId={orderId} onUploaded={() => setShowUploader(false)} />
         </div>
       )}
@@ -159,7 +159,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
         className="flex-1 overflow-y-auto px-5 py-4 space-y-1"
       >
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full text-zinc-600 text-sm">
+          <div className="flex items-center justify-center h-full text-warm-gray text-sm">
             No messages yet. Start the conversation!
           </div>
         )}
@@ -180,7 +180,7 @@ export default function ChatWindow({ orderId, initialMessages, currentUserId, is
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="px-5 py-4 border-t border-zinc-800">
+      <form onSubmit={sendMessage} className="px-5 py-4 border-t border-zinc-200">
         <div className="flex gap-3 items-end">
           <textarea
             value={content}

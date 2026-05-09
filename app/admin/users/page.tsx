@@ -28,8 +28,8 @@ export default async function AdminUsersPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-white">Customers</h1>
-        <div className="flex items-center gap-3 text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-charcoal">Customers</h1>
+        <div className="flex items-center gap-3 text-sm text-warm-gray">
           <span>{users.filter(u => u.role === 'user').length} customers</span>
         </div>
       </div>
@@ -43,28 +43,28 @@ export default async function AdminUsersPage() {
           { label: 'Total Revenue', value: `$${orderStats.reduce((s, o) => s + (o._sum.quote ?? 0), 0).toFixed(2)}` },
         ].map(stat => (
           <div key={stat.label} className="card p-4">
-            <p className="text-xl font-bold text-white">{stat.value}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">{stat.label}</p>
+            <p className="text-xl font-bold text-charcoal">{stat.value}</p>
+            <p className="text-xs text-warm-gray mt-0.5">{stat.label}</p>
           </div>
         ))}
       </div>
 
       {resetRequests.length > 0 && (
         <div className="card overflow-hidden mb-8">
-          <div className="px-5 py-4 border-b border-zinc-800 flex items-center gap-3">
-            <h2 className="font-semibold text-white">Password Reset Requests</h2>
-            <span className="text-xs bg-red-900/60 text-red-300 border border-red-800 px-2 py-0.5 rounded-full">
+          <div className="px-5 py-4 border-b border-taupe/30 flex items-center gap-3">
+            <h2 className="font-semibold text-charcoal">Password Reset Requests</h2>
+            <span className="text-xs bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full">
               {resetRequests.length}
             </span>
           </div>
-          <div className="divide-y divide-zinc-800">
+          <div className="divide-y divide-taupe/10">
             {resetRequests.map((req) => (
               <div key={req.id} className="px-5 py-4 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm text-white font-medium">{req.name}</p>
-                  <p className="text-xs text-zinc-400">{req.email}</p>
+                  <p className="text-sm text-charcoal font-medium">{req.name}</p>
+                  <p className="text-xs text-warm-gray">{req.email}</p>
                 </div>
-                <p className="text-xs text-zinc-600 shrink-0">
+                <p className="text-xs text-warm-gray/60 shrink-0">
                   {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
@@ -76,7 +76,7 @@ export default async function AdminUsersPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wide">
+            <thead className="bg-taupe/10 text-warm-gray text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-5 py-3 text-left">Name</th>
                 <th className="px-5 py-3 text-left">Email</th>
@@ -87,31 +87,31 @@ export default async function AdminUsersPage() {
                 <th className="px-5 py-3 text-left">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800">
+            <tbody className="divide-y divide-taupe/10">
               {users.map((user) => {
                 const stat = statsMap.get(user.id)
                 return (
-                  <tr key={user.id} className="hover:bg-zinc-900/40 transition-colors">
-                    <td className="px-5 py-3 text-white font-medium">{user.name ?? '—'}</td>
-                    <td className="px-5 py-3 text-zinc-400">{user.email}</td>
+                  <tr key={user.id} className="hover:bg-taupe/5 transition-colors">
+                    <td className="px-5 py-3 text-charcoal font-medium">{user.name ?? '—'}</td>
+                    <td className="px-5 py-3 text-warm-gray">{user.email}</td>
                     <td className="px-5 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user.role === 'admin' ? 'bg-white/10 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user.role === 'admin' ? 'bg-charcoal text-white' : 'bg-taupe/20 text-warm-gray'}`}>
                         {user.role}
                       </span>
                     </td>
                     <td className="px-5 py-3">
                       {stat ? (
-                        <Link href={`/admin/orders?userId=${user.id}`} className="text-zinc-300 hover:text-white transition-colors">
+                        <Link href={`/admin/orders?userId=${user.id}`} className="text-warm-gray hover:text-charcoal transition-colors">
                           {stat.count} order{stat.count !== 1 ? 's' : ''}
                         </Link>
                       ) : (
-                        <span className="text-zinc-600">0</span>
+                        <span className="text-warm-gray/60">0</span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-zinc-300">
-                      {stat && stat.spent > 0 ? `$${stat.spent.toFixed(2)}` : <span className="text-zinc-600">—</span>}
+                    <td className="px-5 py-3 text-warm-gray">
+                      {stat && stat.spent > 0 ? `$${stat.spent.toFixed(2)}` : <span className="text-warm-gray/60">—</span>}
                     </td>
-                    <td className="px-5 py-3 text-zinc-500">
+                    <td className="px-5 py-3 text-warm-gray">
                       {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
                     <td className="px-5 py-3">
@@ -122,7 +122,7 @@ export default async function AdminUsersPage() {
               })}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-zinc-600">No users yet</td>
+                  <td colSpan={7} className="px-5 py-10 text-center text-warm-gray">No users yet</td>
                 </tr>
               )}
             </tbody>

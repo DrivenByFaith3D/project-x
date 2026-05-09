@@ -69,12 +69,12 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
     <>
       <div className="card p-5 mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Order Photos</h2>
+          <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide">Order Photos</h2>
           {!pendingFile && (
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="text-xs px-2.5 py-1 rounded bg-zinc-700 text-white hover:bg-zinc-600 transition-colors disabled:opacity-40"
+              className="text-xs px-2.5 py-1 rounded bg-charcoal text-white hover:bg-zinc-800 transition-colors disabled:opacity-40"
             >
               + Add Photo
             </button>
@@ -90,10 +90,10 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
 
         {/* Pending upload form */}
         {pendingFile && (
-          <div className="mb-4 p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg space-y-3">
-            <p className="text-xs text-zinc-400 font-medium truncate">{pendingFile.name}</p>
+          <div className="mb-4 p-3 bg-cream border border-zinc-200 rounded-lg space-y-3">
+            <p className="text-xs text-warm-gray font-medium truncate">{pendingFile.name}</p>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Caption (optional)</label>
+              <label className="block text-xs text-warm-gray mb-1">Caption (optional)</label>
               <input
                 type="text"
                 value={caption}
@@ -103,7 +103,7 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Category</label>
+              <label className="block text-xs text-warm-gray mb-1">Category</label>
               <select value={category} onChange={e => setCategory(e.target.value)} className="input w-full text-sm">
                 {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
@@ -112,13 +112,13 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="text-xs px-3 py-1.5 rounded bg-white text-black hover:bg-zinc-200 transition-colors disabled:opacity-40 font-medium"
+                className="text-xs px-3 py-1.5 rounded bg-charcoal text-white hover:bg-zinc-800 transition-colors disabled:opacity-40 font-medium"
               >
                 {uploading ? 'Uploading…' : 'Upload'}
               </button>
               <button
                 onClick={() => { setPendingFile(null); if (fileRef.current) fileRef.current.value = '' }}
-                className="text-xs px-3 py-1.5 rounded bg-zinc-700 text-zinc-300 hover:bg-zinc-600 transition-colors"
+                className="text-xs px-3 py-1.5 rounded bg-white border border-zinc-200 text-warm-gray hover:bg-zinc-50 transition-colors"
               >
                 Cancel
               </button>
@@ -127,11 +127,11 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
         )}
 
         {photos.length === 0 ? (
-          <p className="text-xs text-zinc-600 py-2">No photos yet. Upload a photo of the finished print to share with the customer.</p>
+          <p className="text-xs text-warm-gray py-2">No photos yet. Upload a photo of the finished print to share with the customer.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {photos.map((photo) => (
-              <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-zinc-700">
+              <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-zinc-200">
                 <div className="aspect-square">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -142,12 +142,12 @@ export default function AdminOrderPhotos({ orderId, initialPhotos }: { orderId: 
                   />
                 </div>
                 {(photo.caption || photo.category) && (
-                  <div className="px-2 py-1.5 bg-zinc-900 border-t border-zinc-800">
+                  <div className="px-2 py-1.5 bg-cream border-t border-zinc-200">
                     {photo.category && (
-                      <span className="text-xs text-zinc-500 capitalize">{photo.category.replace('_', ' ')}</span>
+                      <span className="text-xs text-warm-gray capitalize">{photo.category.replace('_', ' ')}</span>
                     )}
                     {photo.caption && (
-                      <p className="text-xs text-zinc-400 truncate mt-0.5">{photo.caption}</p>
+                      <p className="text-xs text-warm-gray truncate mt-0.5">{photo.caption}</p>
                     )}
                   </div>
                 )}

@@ -47,18 +47,18 @@ export default function ProductReviews({ productId, isLoggedIn }: { productId: s
   return (
     <div className="mt-8">
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-lg font-bold text-white">Reviews</h2>
+        <h2 className="text-lg font-bold text-charcoal">Reviews</h2>
         {reviews.length > 0 && (
           <div className="flex items-center gap-2">
             <StarRating value={Math.round(avg)} size="sm" />
-            <span className="text-sm text-zinc-400">{avg.toFixed(1)} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
+            <span className="text-sm text-warm-gray">{avg.toFixed(1)} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
           </div>
         )}
       </div>
 
       {isLoggedIn && !submitted && (
         <form onSubmit={submitReview} className="card p-5 mb-6 space-y-3">
-          <p className="text-sm font-medium text-zinc-300">Leave a review</p>
+          <p className="text-sm font-medium text-warm-gray">Leave a review</p>
           <StarRating value={rating} onChange={setRating} />
           <textarea
             value={comment}
@@ -89,14 +89,14 @@ export default function ProductReviews({ productId, isLoggedIn }: { productId: s
             <div key={r.id} className="card p-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white">{r.userName}</span>
+                  <span className="text-sm font-medium text-charcoal">{r.userName}</span>
                   <StarRating value={r.rating} size="sm" />
                 </div>
                 <span className="text-xs text-zinc-600">
                   {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
-              {r.comment && <p className="text-sm text-zinc-300">{r.comment}</p>}
+              {r.comment && <p className="text-sm text-warm-gray">{r.comment}</p>}
             </div>
           ))}
         </div>

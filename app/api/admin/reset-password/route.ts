@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { requireAdmin } from '@/lib/api'
+import { randomBytes } from 'crypto'
 
-const DEFAULT_PASSWORD = 'drivenbyfaith3d'
+function generateTempPassword(): string {
+  return randomBytes(12).toString('base64url').slice(0, 16)
+}
 
 export async function POST(req: NextRequest) {
   const { error } = await requireAdmin()
@@ -15,10 +18,11 @@ export async function POST(req: NextRequest) {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
+  const tempPassword = generateTempPassword()
   await prisma.user.update({
     where: { id: userId },
-    data: { password: await bcrypt.hash(DEFAULT_PASSWORD, 10), mustChangePassword: true },
+    data: { password: await bcrypt.hash(tempPassword, 10), mustChangePassword: true },
   })
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, tempPassword })
 }

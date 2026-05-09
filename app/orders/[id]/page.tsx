@@ -52,9 +52,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <p className="text-sm text-zinc-500">Order</p>
-          <h1 className="text-2xl font-bold text-white">{formatOrderId(order)}</h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-warm-gray">Order</p>
+          <h1 className="text-2xl font-bold text-charcoal">{formatOrderId(order)}</h1>
+          <p className="text-sm text-warm-gray mt-1">
             Created {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -62,7 +62,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           {!isAdmin && order.status === 'delivered' && (
             <Link
               href={`/orders/new?type=${order.orderType ?? 'scratch'}&description=${encodeURIComponent(order.description.slice(0, 500))}`}
-              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border border-taupe/30 text-warm-gray hover:border-taupe/30 hover:text-charcoal transition-colors"
             >
               Reorder
             </Link>
@@ -76,7 +76,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               Download Label
             </a>
           )}
-          <span className={`text-sm font-medium px-3 py-1.5 rounded-full ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
+          <span className={`text-sm font-medium px-3 py-1.5 rounded-full ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-warm-gray'}`}>
             {STATUS_LABELS[order.status] ?? order.status.replace(/_/g, ' ')}
           </span>
         </div>
@@ -95,22 +95,22 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {!isAdmin && order.customerNotes && (
         <div className="card p-5 mb-6 border border-blue-800/40 bg-blue-950/10">
           <h2 className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-2">Note from Team</h2>
-          <p className="text-sm text-zinc-300 whitespace-pre-wrap">{order.customerNotes}</p>
+          <p className="text-sm text-warm-gray whitespace-pre-wrap">{order.customerNotes}</p>
         </div>
       )}
 
       {isAdmin && order.quoteHistory.length > 0 && (
         <div className="card p-5 mb-6">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Quote History</h2>
+          <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Quote History</h2>
           <div className="space-y-2">
             {order.quoteHistory.map((q, i) => (
               <div key={q.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <span className={`font-semibold ${i === order.quoteHistory.length - 1 ? 'text-white' : 'text-zinc-500 line-through'}`}>
+                  <span className={`font-semibold ${i === order.quoteHistory.length - 1 ? 'text-charcoal' : 'text-warm-gray line-through'}`}>
                     ${q.amount.toFixed(2)}
                   </span>
                   {i === order.quoteHistory.length - 1 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300">current</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-warm-gray">current</span>
                   )}
                 </div>
                 <span className="text-zinc-600 text-xs">
@@ -126,8 +126,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <div className="card p-5 mb-6 border border-yellow-800/50 bg-yellow-950/20">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-white">Quote Ready</h2>
-              <p className="text-zinc-400 text-sm mt-0.5">Your order has been quoted at <span className="text-white font-semibold">${order.quote.toFixed(2)}</span>. Pay to get started.</p>
+              <h2 className="text-sm font-semibold text-charcoal">Quote Ready</h2>
+              <p className="text-warm-gray text-sm mt-0.5">Your order has been quoted at <span className="text-charcoal font-semibold">${order.quote.toFixed(2)}</span>. Pay to get started.</p>
             </div>
             <PayButton orderId={order.id} amount={order.quote} />
           </div>
@@ -153,7 +153,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       {order.files.length > 0 && (
         <div className="card p-5 mb-6">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Uploaded Files</h2>
+          <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Uploaded Files</h2>
           <div className="space-y-4">
             {order.files.map((file) => (
               <FilePreview key={file.id} url={file.url} name={file.name ?? ''} />

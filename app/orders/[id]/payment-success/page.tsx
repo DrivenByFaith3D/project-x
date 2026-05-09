@@ -9,8 +9,8 @@ export default async function PaymentSuccessPage({ params }: { params: Promise<{
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-white mb-2">Payment Successful</h1>
-      <p className="text-zinc-400 mb-8">Thank you! Your payment was received and your order is now in progress. We&apos;ll keep you updated via the chat.</p>
+      <h1 className="text-2xl font-bold text-charcoal mb-2">Payment Successful</h1>
+      <p className="text-warm-gray mb-8">Thank you! Your payment was received and your order is now in progress. We&apos;ll keep you updated via the chat.</p>
       <Link href={`/orders/${id}`} className="btn-primary">
         Back to Order
       </Link>

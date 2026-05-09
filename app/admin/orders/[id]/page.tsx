@@ -56,19 +56,19 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/orders" className="text-zinc-500 hover:text-white transition-colors">
+        <Link href="/admin/orders" className="text-warm-gray hover:text-charcoal transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold text-white">{formatOrderId(order)}</h1>
-            <span className={`text-sm font-medium px-3 py-1 rounded-full ${STATUS_STYLES[order.status] ?? 'bg-zinc-800 text-zinc-300'}`}>
+            <h1 className="text-2xl font-bold text-charcoal">{formatOrderId(order)}</h1>
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${STATUS_STYLES[order.status] ?? 'bg-taupe/20 text-warm-gray'}`}>
               {STATUS_LABELS[order.status] ?? order.status.replace(/_/g, ' ')}
             </span>
           </div>
-          <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 flex-wrap">
+          <div className="flex items-center gap-3 mt-1 text-sm text-warm-gray flex-wrap">
             <span>{order.user.name ?? order.user.email}</span>
             <span>·</span>
             <span>{order.user.email}</span>
@@ -84,10 +84,10 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
 
           {/* Description */}
           <div className="card p-5 mb-6">
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Description</h2>
-            <p className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed">{order.description}</p>
+            <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-2">Description</h2>
+            <p className="text-sm text-charcoal/85 whitespace-pre-wrap leading-relaxed">{order.description}</p>
             {order.orderType && (
-              <p className="text-xs text-zinc-600 mt-2">
+              <p className="text-xs text-warm-gray/60 mt-2">
                 Type: {order.orderType === 'stl' ? 'STL File' : order.orderType === 'image' ? 'Image Reference' : 'From Scratch'}
               </p>
             )}
@@ -96,7 +96,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           {/* Files */}
           {order.files.length > 0 && (
             <div className="card p-5 mb-6">
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Uploaded Files</h2>
+              <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Uploaded Files</h2>
               <div className="space-y-4">
                 {order.files.map((file) => (
                   <FilePreview key={file.id} url={file.url} name={file.name ?? ''} />
@@ -155,17 +155,17 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           {/* Quote history */}
           {order.quoteHistory.length > 0 && (
             <div className="card p-5">
-              <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Quote History</h2>
+              <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-3">Quote History</h2>
               <div className="space-y-2">
                 {order.quoteHistory.map((q, i) => (
                   <div key={q.id} className="flex items-center justify-between text-sm">
-                    <span className={`font-semibold ${i === order.quoteHistory.length - 1 ? 'text-white' : 'text-zinc-500 line-through'}`}>
+                    <span className={`font-semibold ${i === order.quoteHistory.length - 1 ? 'text-charcoal' : 'text-warm-gray line-through'}`}>
                       ${q.amount.toFixed(2)}
                       {i === order.quoteHistory.length - 1 && (
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300 font-normal">current</span>
+                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-taupe/20 text-warm-gray font-normal">current</span>
                       )}
                     </span>
-                    <span className="text-zinc-600 text-xs">
+                    <span className="text-warm-gray/60 text-xs">
                       {new Date(q.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                     </span>
                   </div>

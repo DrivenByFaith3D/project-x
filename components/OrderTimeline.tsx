@@ -18,7 +18,7 @@ export default function OrderTimeline({ events }: { events: OrderEvent[] }) {
 
   return (
     <div className="card p-5 mb-6">
-      <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-4">Activity Timeline</h2>
+      <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide mb-4">Activity Timeline</h2>
       <div className="space-y-0">
         {events.map((event, i) => {
           const style = EVENT_STYLES[event.type] ?? EVENT_STYLES.status_changed

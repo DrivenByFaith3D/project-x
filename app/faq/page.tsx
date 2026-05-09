@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: 'FAQ' }
 const FAQS = [
   {
     q: 'What file formats do you accept?',
-    a: 'We accept STL and 3MF files — the two standard formats for 3D printing. If you only have an image or idea, no worries — just describe what you want and we\'ll take it from there.',
+    a: 'We accept STL and 3MF files: the two standard formats for 3D printing. If you only have an image or idea, no worries - just describe what you want and we\'ll take it from there.',
   },
   {
     q: 'How long does it take to get a quote?',
@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: 'How long does printing take?',
-    a: 'Most orders ship within 3–7 business days depending on size and complexity. Rush orders may be available — just mention it in your description.',
+    a: 'Most orders ship within 3–7 business days depending on size and complexity. Rush orders may be available - just mention it in your description.',
   },
   {
     q: 'What material do you print with?',
@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     q: 'Do you offer refunds?',
-    a: 'Since every order is custom-made, we generally do not offer refunds once printing has started. However, if there is a defect or error on our end, we\'ll reprint or refund — just reach out through your order chat.',
+    a: 'Since every order is custom-made, we generally do not offer refunds once printing has started. However, if there is a defect or error on our end, we\'ll reprint or refund, just reach out through your order chat.',
   },
   {
     q: 'Can I track my order?',
@@ -49,21 +49,21 @@ export default function FAQPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="mb-10">
-        <p className="text-xs font-semibold tracking-widest text-zinc-500 uppercase mb-2">Help</p>
-        <h1 className="text-3xl font-bold text-white">Frequently Asked Questions</h1>
-        <p className="text-zinc-400 mt-2">Everything you need to know about ordering from DrivenByFaith3D.</p>
+        <p className="text-xs font-semibold tracking-widest text-warm-gray uppercase mb-2">Help</p>
+        <h1 className="text-3xl font-bold text-charcoal">Frequently Asked Questions</h1>
+        <p className="text-warm-gray mt-2">Everything you need to know about ordering from DrivenByFaith3D.</p>
       </div>
 
       <div className="space-y-4">
         {FAQS.map((faq, i) => (
           <details key={i} className="card group">
             <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none">
-              <span className="font-medium text-white pr-4">{faq.q}</span>
-              <svg className="w-4 h-4 text-zinc-500 shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span className="font-medium text-charcoal pr-4">{faq.q}</span>
+              <svg className="w-4 h-4 text-warm-gray shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </summary>
-            <div className="px-5 pb-4 text-sm text-zinc-400 leading-relaxed border-t border-zinc-800 pt-3">
+            <div className="px-5 pb-4 text-sm text-warm-gray leading-relaxed border-t border-taupe/30 pt-3">
               {faq.a}
             </div>
           </details>
@@ -71,7 +71,7 @@ export default function FAQPage() {
       </div>
 
       <div className="card p-6 mt-10 text-center">
-        <p className="text-zinc-400 text-sm mb-3">Still have questions? Send us a message through your order chat or create an order and ask.</p>
+        <p className="text-warm-gray text-sm mb-3">Still have questions? Send us a message through your order chat or create an order and ask.</p>
         <a href="/orders/new" className="btn-primary text-sm">Start an Order</a>
       </div>
     </div>

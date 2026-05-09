@@ -14,8 +14,8 @@ export default async function AdminCouponsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Coupons</h1>
-          <p className="text-zinc-500 text-sm mt-1">Create and manage discount codes</p>
+          <h1 className="text-2xl font-bold text-charcoal">Coupons</h1>
+          <p className="text-warm-gray text-sm mt-1">Create and manage discount codes</p>
         </div>
       </div>
       <CouponsClient initialCoupons={coupons} />

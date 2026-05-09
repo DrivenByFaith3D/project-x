@@ -62,15 +62,15 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Orders</h1>
-          <p className="text-zinc-400 text-sm mt-1">Track and manage your custom orders</p>
+          <h1 className="text-2xl font-bold text-charcoal">My Orders</h1>
+          <p className="text-warm-gray text-sm mt-1">Track and manage your custom orders</p>
         </div>
         <Link href="/orders/new" className="btn-primary">+ New Order</Link>
       </div>
 
       <form method="GET" className="mb-6">
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -83,8 +83,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         </div>
         {search && (
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-zinc-500">Results for <span className="text-zinc-300">&ldquo;{search}&rdquo;</span></span>
-            <Link href="/orders" className="text-xs text-zinc-500 hover:text-white underline transition-colors">Clear</Link>
+            <span className="text-xs text-warm-gray">Results for <span className="text-warm-gray">&ldquo;{search}&rdquo;</span></span>
+            <Link href="/orders" className="text-xs text-warm-gray hover:text-charcoal underline transition-colors">Clear</Link>
           </div>
         )}
       </form>
@@ -95,15 +95,15 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="font-medium text-zinc-400">No orders yet</p>
-          <p className="text-sm mt-1 mb-6 text-zinc-500">Create your first custom order to get started.</p>
+          <p className="font-medium text-warm-gray">No orders yet</p>
+          <p className="text-sm mt-1 mb-6 text-warm-gray">Create your first custom order to get started.</p>
           <Link href="/orders/new" className="btn-primary">Create Order</Link>
         </div>
       ) : orders.length === 0 ? (
         <div className="card p-12 text-center">
-          <p className="font-medium text-zinc-400">No orders found</p>
-          <p className="text-sm mt-1 text-zinc-500">No orders match &ldquo;{search}&rdquo;.</p>
-          <Link href="/orders" className="text-sm text-zinc-500 hover:text-white underline mt-3 inline-block transition-colors">Clear search</Link>
+          <p className="font-medium text-warm-gray">No orders found</p>
+          <p className="text-sm mt-1 text-warm-gray">No orders match &ldquo;{search}&rdquo;.</p>
+          <Link href="/orders" className="text-sm text-warm-gray hover:text-charcoal underline mt-3 inline-block transition-colors">Clear search</Link>
         </div>
       ) : (
         <>
@@ -111,29 +111,29 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             {orders.map((order) => {
               const unread = unreadMap.get(order.id) ?? 0
               return (
-                <div key={order.id} className={`card p-5 flex items-center justify-between hover:border-zinc-600 transition-colors ${unread > 0 ? 'border-blue-800/60' : ''}`}>
+                <div key={order.id} className={`card p-5 flex items-center justify-between hover:border-taupe/30 transition-colors ${unread > 0 ? 'border-blue-800/60' : ''}`}>
                   <Link href={`/orders/${order.id}`} className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-white text-sm">Order {formatOrderId(order)}</p>
+                      <p className="font-medium text-charcoal text-sm">Order {formatOrderId(order)}</p>
                       {unread > 0 && (
-                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-blue-600 text-white rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-blue-600 text-charcoal rounded-full">
                           {unread}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-zinc-400 mt-0.5 line-clamp-1">{order.description}</p>
+                    <p className="text-sm text-warm-gray mt-0.5 line-clamp-1">{order.description}</p>
                     <p className="text-xs text-zinc-600 mt-1">
                       {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   </Link>
                   <div className="flex items-center gap-3 ml-4 shrink-0">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-zinc-300'}`}>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[order.status] || 'bg-zinc-800 text-warm-gray'}`}>
                       {order.status.replace('_', ' ')}
                     </span>
                     {['delivered', 'completed'].includes(order.status) && (
                       <Link
                         href={`/orders/new?type=${order.orderType ?? 'scratch'}&description=${encodeURIComponent(order.description.slice(0, 500))}`}
-                        className="text-xs text-zinc-500 hover:text-white border border-zinc-700 hover:border-zinc-500 px-2 py-1 rounded transition-colors"
+                        className="text-xs text-warm-gray hover:text-charcoal border border-taupe/30 hover:border-taupe/30 px-2 py-1 rounded transition-colors"
                         title="Reorder"
                       >
                         Reorder
@@ -152,20 +152,20 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-warm-gray">
                 Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} of {total} orders
               </p>
               <div className="flex items-center gap-2">
                 {page > 1 && (
                   <Link href={`/orders?page=${page - 1}${search ? `&q=${encodeURIComponent(search)}` : ''}`}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors">
+                    className="text-xs px-3 py-1.5 rounded-lg border border-taupe/30 text-warm-gray hover:border-taupe/30 hover:text-charcoal transition-colors">
                     ← Previous
                   </Link>
                 )}
-                <span className="text-xs text-zinc-500">Page {page} of {totalPages}</span>
+                <span className="text-xs text-warm-gray">Page {page} of {totalPages}</span>
                 {page < totalPages && (
                   <Link href={`/orders?page=${page + 1}${search ? `&q=${encodeURIComponent(search)}` : ''}`}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors">
+                    className="text-xs px-3 py-1.5 rounded-lg border border-taupe/30 text-warm-gray hover:border-taupe/30 hover:text-charcoal transition-colors">
                     Next →
                   </Link>
                 )}

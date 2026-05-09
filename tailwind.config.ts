@@ -11,9 +11,9 @@ const config: Config = {
       colors: {
         cream: '#FAF9F7',
         taupe: '#D6D0C8',
-        'taupe-dark': '#B8B0A6',
+        'taupe-dark': '#7D756D',
         charcoal: '#2C2C2C',
-        'warm-gray': '#6B6459',
+        'warm-gray': '#4A443C',
       },
       fontFamily: {
         serif: ['Georgia', 'Times New Roman', 'serif'],

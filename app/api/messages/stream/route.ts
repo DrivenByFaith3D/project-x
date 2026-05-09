@@ -30,23 +30,27 @@ export async function GET(req: NextRequest) {
     async start(controller) {
       let lastMessageId = resumeId
 
-      // If resuming, fetch messages since the last known one and flush them immediately
+      function formatMessage(m: { id: string; orderId: string; senderId: string; content: string; fileUrl: string | null; createdAt: Date; sender: { email: string; role: string; name: string | null } }) {
+        return JSON.stringify({
+          id: m.id, orderId: m.orderId, senderId: m.senderId,
+          content: m.content, fileUrl: m.fileUrl,
+          createdAt: m.createdAt.toISOString(),
+          senderEmail: m.sender.email, senderName: m.sender.name, senderRole: m.sender.role,
+        })
+      }
+
+      // If resuming, fetch only messages after the last known ID
       if (lastMessageId) {
         try {
           const missed = await prisma.message.findMany({
             where: { orderId },
+            cursor: { id: lastMessageId },
+            skip: 1,
             include: { sender: { select: { email: true, role: true, name: true } } },
             orderBy: { createdAt: 'asc' },
           })
-          const idx = missed.findIndex(m => m.id === lastMessageId)
-          const newOnes = idx === -1 ? missed : missed.slice(idx + 1)
-          for (const m of newOnes) {
-            controller.enqueue(sseMessage('message', JSON.stringify({
-              id: m.id, orderId: m.orderId, senderId: m.senderId,
-              content: m.content, fileUrl: m.fileUrl,
-              createdAt: m.createdAt.toISOString(),
-              senderEmail: m.sender.email, senderName: m.sender.name, senderRole: m.sender.role,
-            }), m.id))
+          for (const m of missed) {
+            controller.enqueue(sseMessage('message', formatMessage(m), m.id))
             lastMessageId = m.id
           }
         } catch { /* ignore, will catch up on next poll */ }
@@ -57,23 +61,16 @@ export async function GET(req: NextRequest) {
 
       const pollInterval = setInterval(async () => {
         try {
-          const messages = await prisma.message.findMany({
+          // Only fetch messages newer than the last one we sent
+          const newMessages = await prisma.message.findMany({
             where: { orderId },
-            include: { sender: { select: { email: true, role: true, name: true } } },
+            ...(lastMessageId ? { cursor: { id: lastMessageId }, skip: 1 } : {}),
             orderBy: { createdAt: 'asc' },
+            include: { sender: { select: { email: true, role: true, name: true } } },
           })
 
-          // Find messages newer than what we last sent
-          const idx = lastMessageId ? messages.findIndex(m => m.id === lastMessageId) : -1
-          const newMessages = idx === -1 && !lastMessageId ? messages : messages.slice(idx + 1)
-
           for (const m of newMessages) {
-            controller.enqueue(sseMessage('message', JSON.stringify({
-              id: m.id, orderId: m.orderId, senderId: m.senderId,
-              content: m.content, fileUrl: m.fileUrl,
-              createdAt: m.createdAt.toISOString(),
-              senderEmail: m.sender.email, senderName: m.sender.name, senderRole: m.sender.role,
-            }), m.id))
+            controller.enqueue(sseMessage('message', formatMessage(m), m.id))
             lastMessageId = m.id
           }
         } catch {

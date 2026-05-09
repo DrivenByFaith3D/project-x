@@ -48,10 +48,10 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
     >
       {!groupWithPrev && (
         <div className={`flex items-center gap-2 mb-1 ${isOwn ? 'flex-row-reverse' : ''}`}>
-          <span className={`text-xs font-medium ${isAdminSender ? 'text-zinc-300' : 'text-zinc-500'}`}>
+          <span className={`text-xs font-medium ${isAdminSender ? 'text-charcoal' : 'text-warm-gray'}`}>
             {senderLabel}
           </span>
-          <span className="text-xs text-zinc-600">{time}</span>
+          <span className="text-xs text-warm-gray">{time}</span>
         </div>
       )}
 
@@ -61,7 +61,7 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
           <div className={`flex items-center gap-1 transition-opacity ${hovered ? 'opacity-100' : 'opacity-0'}`}>
             <button
               onClick={() => { setEditValue(message.content); setEditing(true) }}
-              className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 rounded"
+              className="text-warm-gray hover:text-charcoal transition-colors p-1 rounded"
               title="Edit"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
             </button>
             <button
               onClick={() => onDelete(message.id)}
-              className="text-zinc-600 hover:text-red-400 transition-colors p-1 rounded"
+              className="text-warm-gray hover:text-red-500 transition-colors p-1 rounded"
               title="Delete"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +105,7 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
               autoFocus
             />
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setEditing(false)} className="text-xs text-zinc-500 hover:text-white px-2 py-1">
+              <button onClick={() => setEditing(false)} className="text-xs text-warm-gray hover:text-charcoal px-2 py-1">
                 Cancel
               </button>
               <button onClick={submitEdit} disabled={saving} className="btn-primary text-xs px-3 py-1">
@@ -116,15 +116,13 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
         ) : (
           <div className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-2.5 text-sm leading-relaxed ${
             isOwn
-              ? `bg-white text-black ${groupWithPrev ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-br-md'}`
-              : isAdminSender
-              ? `bg-zinc-700 text-white ${groupWithPrev ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-md'}`
-              : `bg-zinc-800 text-white ${groupWithPrev ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-md'}`
+              ? `bg-charcoal text-white ${groupWithPrev ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-br-md'}`
+              : `bg-white border border-taupe text-charcoal ${groupWithPrev ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-md'}`
           }`}>
             {message.content}
             {message.fileUrl && (
               <a href={message.fileUrl} target="_blank" rel="noopener noreferrer"
-                className={`mt-2 flex items-center gap-1 text-xs underline ${isOwn ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                className={`mt-2 flex items-center gap-1 text-xs underline ${isOwn ? 'text-white/80 hover:text-white' : 'text-warm-gray hover:text-charcoal'}`}>
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -137,7 +135,7 @@ export default function MessageBubble({ message, isOwn, groupWithPrev, onEdit, o
       </div>
 
       {groupWithPrev && !editing && (
-        <span className="text-xs text-zinc-700 mt-0.5 px-1">{time}</span>
+        <span className="text-xs text-warm-gray mt-0.5 px-1">{time}</span>
       )}
     </div>
   )

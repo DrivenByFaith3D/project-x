@@ -40,10 +40,10 @@ export default function OrderDescription({ orderId, initialDescription, canEdit 
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Description</h2>
+        <h2 className="text-xs font-semibold text-warm-gray uppercase tracking-wide">Description</h2>
         {canEdit && !editing && (
           <button onClick={() => { setDraft(description); setEditing(true) }}
-            className="text-xs text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800">
+            className="text-xs text-warm-gray hover:text-charcoal transition-colors px-2 py-1 rounded hover:bg-zinc-800">
             Edit
           </button>
         )}

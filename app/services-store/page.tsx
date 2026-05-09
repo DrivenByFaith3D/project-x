@@ -34,20 +34,11 @@ export default function ServicesStorePage() {
 
           {/* Service 1: Shop Collection → links to /listings */}
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
-            <div className="w-[150px] h-[150px] shrink-0 rounded-lg overflow-hidden bg-taupe/20 relative">
-              <Image
-                src="/services/shop-collection.jpg"
-                alt="Shop Collection"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
             <div className="flex-1 min-w-0">
               <div className="mb-3">
                 <h3 className="text-2xl sm:text-3xl font-display">Shop Collection</h3>
               </div>
-              <p className="text-charcoal/70 text-base leading-relaxed mb-5">
+              <p className="text-charcoal/90 text-base leading-relaxed mb-5">
                 Browse our ready-made desk organizer designs. Pick a style, choose your color, and we print it for you. Each product is individually priced — simple, fast, and affordable.
               </p>
               <Link href="/listings" className="btn-primary inline-block text-sm">
@@ -58,21 +49,12 @@ export default function ServicesStorePage() {
 
           {/* Service 2: Customize Our Prints */}
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
-            <div className="w-[150px] h-[150px] shrink-0 rounded-lg overflow-hidden bg-taupe/20 relative">
-              <Image
-                src="/services/customize-prints.jpg"
-                alt="Customize Our Prints"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                 <h3 className="text-2xl sm:text-3xl font-display">Customize Our Prints</h3>
                 <span className="text-xl font-display text-charcoal shrink-0">$7/print hr</span>
               </div>
-              <p className="text-charcoal/70 text-base leading-relaxed mb-5">
+              <p className="text-charcoal/90 text-base leading-relaxed mb-5">
                 Love one of our existing designs but want it tweaked? Change the size, color, material, or add personal touches. Pick a base design from our shop, then tell us how to make it yours.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -88,21 +70,12 @@ export default function ServicesStorePage() {
 
           {/* Service 3: Design & Print */}
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
-            <div className="w-[150px] h-[150px] shrink-0 rounded-lg overflow-hidden bg-taupe/20 relative">
-              <Image
-                src="/services/design-print.jpg"
-                alt="Design & Print"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                 <h3 className="text-2xl sm:text-3xl font-display">Design & Print</h3>
                 <span className="text-xl font-display text-charcoal shrink-0">$12/print hr</span>
               </div>
-              <p className="text-charcoal/70 text-base leading-relaxed mb-5">
+              <p className="text-charcoal/90 text-base leading-relaxed mb-5">
                 The full package. We design a completely custom organizer from scratch based on your space and needs, then print and ship it to you. Includes a one-on-one consultation to nail every detail.
               </p>
               <div className="flex flex-wrap gap-3">

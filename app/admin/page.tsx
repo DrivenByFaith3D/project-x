@@ -20,7 +20,7 @@ export default async function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-white mb-8">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-charcoal mb-8">Admin Dashboard</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
@@ -30,8 +30,8 @@ export default async function AdminPage() {
           { label: 'Delivered',   value: counts.delivered },
         ].map((stat) => (
           <div key={stat.label} className="card p-5">
-            <p className="text-3xl font-bold text-white">{stat.value}</p>
-            <p className="text-sm font-medium mt-1 text-zinc-400">{stat.label}</p>
+            <p className="text-3xl font-bold text-charcoal">{stat.value}</p>
+            <p className="text-sm font-medium mt-1 text-warm-gray">{stat.label}</p>
           </div>
         ))}
       </div>

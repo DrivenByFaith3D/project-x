@@ -4,9 +4,12 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { put } from '@vercel/blob'
 
+const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.user?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const formData = await req.formData()
   const file = formData.get('file') as File | null
@@ -15,7 +18,11 @@ export async function POST(req: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-  const ext = file.name.split('.').pop()
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!ext || !ALLOWED_IMAGE_EXTENSIONS.includes(ext)) {
+    return NextResponse.json({ error: 'Only image files are allowed (jpg, jpeg, png, gif, webp)' }, { status: 400 })
+  }
+
   const filename = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
   const blob = await put(filename, file, { access: 'public', contentType: file.type || 'image/jpeg' })
 
@@ -28,7 +35,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (session?.user?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (session.user?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await req.json()
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })

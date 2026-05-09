@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { uploadFile } from '@/lib/storage'
 import { requireAuth } from '@/lib/api'
+import { ALLOWED_FILE_EXTENSIONS } from '@/lib/constants'
 
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB
 
@@ -15,6 +16,11 @@ export async function POST(req: NextRequest) {
 
   if (!file || !orderId) return NextResponse.json({ error: 'Missing file or orderId' }, { status: 400 })
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File too large (max 50MB)' }, { status: 400 })
+
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!ext || !ALLOWED_FILE_EXTENSIONS.includes(ext)) {
+    return NextResponse.json({ error: `File type not allowed. Allowed: ${ALLOWED_FILE_EXTENSIONS.join(', ')}` }, { status: 400 })
+  }
 
   const order = await prisma.order.findUnique({ where: { id: orderId } })
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
